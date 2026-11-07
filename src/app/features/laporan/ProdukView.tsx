@@ -3,11 +3,11 @@
 import { useState } from "react";
 import type { ProdukTerlaris } from "@/app/lib/laporan/data";
 import { angka, rupiah } from "@/app/lib/format";
-import { FotoProduk } from "@/components/ui/FotoProduk";
-import { kartu } from "@/components/ui/gaya";
-import { LaporanData } from "@/components/laporan/LaporanData";
-import { PilihanSelect } from "@/components/ui/PilihanSelect";
-import { Tabel } from "@/components/ui/Tabel";
+import { FotoProduk } from "@/app/components/ui/FotoProduk";
+import { kartu } from "@/app/components/ui/gaya";
+import { LaporanData } from "@/app/components/laporan/LaporanData";
+import { PilihanSelect } from "@/app/components/ui/PilihanSelect";
+import { Tabel } from "@/app/components/ui/Tabel";
 
 type Urutan = "terjual" | "pendapatan";
 

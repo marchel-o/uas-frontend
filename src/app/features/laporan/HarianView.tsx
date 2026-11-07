@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { dariKunci, jumlahkan, type HariPenjualan } from "@/app/lib/laporan/data";
 import { angka, rupiah, tanggalHari, tanggalPendek } from "@/app/lib/format";
-import { GrafikBatang } from "@/components/ui/Grafik";
-import { kartu } from "@/components/ui/gaya";
-import { LaporanData } from "@/components/laporan/LaporanData";
-import { PilihanSelect } from "@/components/ui/PilihanSelect";
-import { Tabel } from "@/components/ui/Tabel";
+import { GrafikBatang } from "@/app/components/ui/Grafik";
+import { kartu } from "@/app/components/ui/gaya";
+import { LaporanData } from "@/app/components/laporan/LaporanData";
+import { PilihanSelect } from "@/app/components/ui/PilihanSelect";
+import { Tabel } from "@/app/components/ui/Tabel";
 
 const opsi = [
   { nilai: "7", label: "7 hari terakhir" },

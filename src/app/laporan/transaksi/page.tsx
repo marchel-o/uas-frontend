@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TransaksiView } from "@/features/laporan/TransaksiView";
+import { TransaksiView } from "@/app/features/laporan/TransaksiView";
 
 export const metadata: Metadata = { title: "Riwayat Transaksi | Laporan" };
 

@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { bandingkanBulan, dariKunci, selisihPersen, type Laporan } from "@/app/lib/laporan/data";
 import { angka, rupiah, tanggalPendek } from "@/app/lib/format";
-import { GrafikBatang } from "@/components/ui/Grafik";
-import { FotoProduk } from "@/components/ui/FotoProduk";
-import { kartu, tautan } from "@/components/ui/gaya";
-import { LaporanData } from "@/components/laporan/LaporanData";
-import { Perubahan } from "@/components/laporan/Perubahan";
+import { GrafikBatang } from "@/app/components/ui/Grafik";
+import { FotoProduk } from "@/app/components/ui/FotoProduk";
+import { kartu, tautan } from "@/app/components/ui/gaya";
+import { LaporanData } from "@/app/components/laporan/LaporanData";
+import { Perubahan } from "@/app/components/laporan/Perubahan";
 
 export function RingkasanView() {
   return <LaporanData>{(laporan) => <Ringkasan laporan={laporan} />}</LaporanData>;

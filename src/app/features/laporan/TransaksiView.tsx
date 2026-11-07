@@ -11,9 +11,9 @@ import {
 } from "@/app/lib/laporan/data";
 import { unduhExcel, unduhPdf } from "@/app/lib/laporan/ekspor";
 import { angka, rupiah } from "@/app/lib/format";
-import { fokus, kartu } from "@/components/ui/gaya";
-import { LaporanData } from "@/components/laporan/LaporanData";
-import { Tabel } from "@/components/ui/Tabel";
+import { fokus, kartu } from "@/app/components/ui/gaya";
+import { LaporanData } from "@/app/components/laporan/LaporanData";
+import { Tabel } from "@/app/components/ui/Tabel";
 
 const UKURAN_HALAMAN = 20;
 

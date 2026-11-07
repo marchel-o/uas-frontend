@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { fokus } from "@/components/ui/gaya";
+import { fokus } from "@/app/components/ui/gaya";
 
 const tab = [
   { nama: "Ringkasan", href: "/laporan" },

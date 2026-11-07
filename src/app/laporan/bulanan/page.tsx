@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BulananView } from "@/features/laporan/BulananView";
+import { BulananView } from "@/app/features/laporan/BulananView";
 
 export const metadata: Metadata = { title: "Laporan Penjualan Bulanan | Laporan" };
 

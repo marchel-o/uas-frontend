@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LaporanTabs } from "@/components/laporan/LaporanTabs";
+import { LaporanTabs } from "@/app/components/laporan/LaporanTabs";
 
 export default function LaporanLayout({ children }: { children: ReactNode }) {
   return (

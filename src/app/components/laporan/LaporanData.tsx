@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { ambilLaporan, DATA_CONTOH, type Laporan } from "@/app/lib/laporan/data";
-import { fokus, kartu } from "@/components/ui/gaya";
+import { fokus, kartu } from "@/app/components/ui/gaya";
 
 type Status =
   | { jenis: "memuat" }
