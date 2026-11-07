@@ -1,32 +1,26 @@
 'use client'
 
-import { TextAlignJustify, X, Bell, CircleUser, Home, Box, NotepadText } from 'lucide-react';
+import { TextAlignJustify, X, Box, NotepadText, Settings, MonitorCloud } from 'lucide-react';
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export function Navbar(){
   const [navOpen, setNavOpen] = useState<boolean>(false);
+  const pathName = usePathname();
 
-  const links = [
-    {
-      name: "Dashboard",
-      link: "/dashboard"
-    },
-    {
-      name: "Produk",
-      link: "/"
-    },
-    {
-      name: "Transaksi",
-      link: "/"
-    },
-    {
-      name: "Laporan",
-      link: "/"
-    },
-    {
-      name: "Pengaturan",
-      link: "/settings"
-    },
+  const sideLinks = [
+    { name: "Dashboard", link: "/main/dashboard" },
+    { name: "Produk", link: "/" },
+    { name: "Transaksi", link: "/" },
+    { name: "Laporan", link: "/"},
+    { name: "Pengaturan", link: "/main/settings" },
+  ]
+
+  const bottomLinks = [
+    { name: "Dashboard", link: "/main/dashboard", icon: (<MonitorCloud size={20} />) },
+    { name: "Produk", link: "/", icon: (<Box size={20} />) },
+    { name: "Transaksi", link: "/", icon: (<NotepadText size={20} />) },
+    { name: "Pengaturan", link: "/main/settings", icon: (<Settings size={20} />) },
   ]
   
   return (
@@ -38,14 +32,7 @@ export function Navbar(){
           onClick={() => setNavOpen(true)}
         />
 
-        {/* <div className='flex items-center gap-6'>
-          <div className='relative'>
-            <div className='absolute w-2 h-2 rounded-full bg-red-500 top-[-5] right-[-1]'></div>
-            <Bell size="1.2em" color='#fff' />
-          </div>
-
-          <CircleUser size="1.7em" color='#fff' />
-        </div> */}
+        <h3 className='font-bold text-[var(--primary)] sm:hidden'>MyKasir</h3>
       </div>
 
       <div 
@@ -61,28 +48,21 @@ export function Navbar(){
           onClick={() => setNavOpen(false)}
         />
 
-        <div className='items-center p-4 justify-between px-5 hidden sm:flex'>
+        <h3 className='font-bold text-lg text-white hidden sm:block p-5'>MyKasir</h3>
+        {/* <div className='items-center p-4 justify-between px-5 hidden sm:flex'>
           <CircleUser size="1.7em" color='#fff' />
 
           <div className='relative'>
             <div className='absolute w-2 h-2 rounded-full bg-red-500 top-[-5] right-[-1]'></div>
             <Bell size="1.2em" color='#fff' />
           </div>
-        </div>
-
-        {/* <div className='flex flex-col mt-8 sm:mt-0 text-white'>
-          <a className='bg-[var(--primary)] m-2 p-2 px-3 rounded-md'>Dashboard</a>
-          <a className='m-2 p-2 px-3 rounded-md hover:bg-red-800'>Produk</a>
-          <a className='m-2 p-2 px-3 rounded-md'>Transaksi</a>
-          <a className='m-2 p-2 px-3 rounded-md'>Laporan</a>
-          <a className='m-2 p-2 px-3 rounded-md'>Pengaturan</a>
         </div> */}
 
-        <div className='flex flex-col mt-8 sm:mt-0 text-white'>
-          {links.map((link) => (
+        <div className='flex flex-col gap-6 mt-8 sm:mt-0 text-white'>
+          {sideLinks.map((link) => (
             <React.Fragment key={link.name}>
               <a
-                className='m-2 p-2 px-3 rounded-md cursor-pointer hover:bg-red-800'
+                className='px-3 mx-2 rounded-md cursor-pointer hover:bg-red-800'
                 href={link.link == "/" ? "/" : link.link}
               >
                 {link.name}
@@ -94,22 +74,19 @@ export function Navbar(){
       </nav>
 
       <nav className="fixed flex items-center justify-around bottom-0 left-0 w-full bg-white text-gray-800 border-t border-gray-300 z-8 p-2 sm:hidden">
-        <div className='flex flex-col justify-center items-center w-16 text-[var(--primary)] font-semibold'>
-          <Home size={20} />
-          <p className='text-[0.7rem]'>Dashboard</p>
-        </div>
-        <div className='flex flex-col justify-center items-center w-16'>
-          <Box size={20} />
-          <p className='text-[0.7rem]'>Products</p>
-        </div>
-        <div className='flex flex-col justify-center items-center w-16'>
-          <NotepadText size={20} />
-          <p className='text-[0.7rem]'>Transactions</p>
-        </div>
-        <div className='flex flex-col justify-center items-center w-16'>
-          <CircleUser size={20} />
-          <p className='text-[0.7rem]'>Profile</p>
-        </div>
+        {bottomLinks.map((link, i) => {
+          const active = link.link === pathName;
+
+          return (
+            <a 
+              key={i} 
+              className={`flex flex-col justify-center items-center w-16 ${active ? "text-[var(--primary)] font-semibold" : ""}`} 
+              href={link.link}>
+              {link.icon}
+              <p className='text-[0.7rem]'>{link.name}</p>
+            </a>
+          )
+        })}
       </nav>
     </>
   )
