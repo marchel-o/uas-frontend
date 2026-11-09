@@ -134,17 +134,20 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    console.error("TRANSACTION ERROR:", error);
+
     return NextResponse.json(
-      {
-        success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Gagal membuat transaksi",
-      },
-      { status: 400 }
-    );
-  }
+        {
+            success: false,
+            message:
+                error instanceof Error
+                ? error.message
+                : "Gagal membuat transaksi",
+            stack: error instanceof Error ? error.stack : null,
+            },
+            { status: 400 }
+        );
+    }
 }
 
 export async function GET() {
