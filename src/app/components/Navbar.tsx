@@ -10,7 +10,7 @@ export function Navbar(){
 
   const sideLinks = [
     { name: "Dashboard", link: "/main/dashboard" },
-    { name: "Produk", link: "/" },
+    { name: "Produk", link: "/main/products" },
     { name: "Transaksi", link: "/" },
     { name: "Laporan", link: "/"},
     { name: "Pengaturan", link: "/main/settings" },
@@ -18,7 +18,7 @@ export function Navbar(){
 
   const bottomLinks = [
     { name: "Dashboard", link: "/main/dashboard", icon: (<MonitorCloud size={20} />) },
-    { name: "Produk", link: "/", icon: (<Box size={20} />) },
+    { name: "Produk", link: "/main/products", icon: (<Box size={20} />) },
     { name: "Transaksi", link: "/", icon: (<NotepadText size={20} />) },
     { name: "Pengaturan", link: "/main/settings", icon: (<Settings size={20} />) },
   ]
