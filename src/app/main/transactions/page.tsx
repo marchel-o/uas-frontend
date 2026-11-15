@@ -1,7 +1,5 @@
 "use client";
 
-import { Podcast } from "lucide-react";
-import { Quantico } from "next/font/google";
 import { useEffect, useState } from "react";
 
 type Product = {
@@ -72,6 +70,26 @@ export default function TransactionsPage() {
             return [...prevCart, {...product, quantity: 1}];
         });
     };
+
+    const updateQuantity = (id: number, amount: number) => {
+        setCart((prevCart) =>
+            prevCart.map((item) => {
+                if(item.id === id) {
+                    const newQuantity = item.quantity + amount;
+
+                    if(newQuantity > item.stock) {
+                        return item;
+                    }
+                    return {...item, quantity: newQuantity};
+                }
+                return item;
+            }).filter((item) => item.quantity > 0)
+        );
+    };
+
+    const total = cart.reduce(
+        (sum, item) => sum + Number(item.price) * item.quantity, 0
+    );
 
     return (
         <div className="min-h-screen p-5">
@@ -157,8 +175,21 @@ export default function TransactionsPage() {
                                 <p className="font-semibold">
                                     {formatRp(Number(item.price) * item.quantity)}
                                 </p>
+
+                                <div>
+                                    <button onClick={() => updateQuantity(item.id, -1)} className="border rounded px-1 m-2">-</button>
+
+                                    <span>{item.quantity}</span>
+                                    <button onClick={() => updateQuantity(item.id, 1)} className="border rounded px-1 m-2">+</button>
+                                </div>
                             </div>
                             ))}
+                            
+                            <div className="flex justify-between mt-5">
+                                <h3 className="font-bold">Total: </h3>
+
+                                <p className="font-bold text-red-600">{formatRp(total)}</p>
+                            </div>
                     </div>
                 )}
             </div>
