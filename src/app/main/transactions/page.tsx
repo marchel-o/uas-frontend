@@ -1,5 +1,7 @@
 "use client";
 
+import { Podcast } from "lucide-react";
+import { Quantico } from "next/font/google";
 import { useEffect, useState } from "react";
 
 type Product = {
@@ -11,10 +13,13 @@ type Product = {
     category: { name:string }; 
 };
 
+type CartItem = Product & {quantity: number;};
+
 export default function TransactionsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [cart, setCart] = useState<CartItem[]>([]);
 
     useEffect(() => {
         async function fetchProducts() {
@@ -43,6 +48,30 @@ export default function TransactionsPage() {
             currency: "IDR",
             maximumFractionDigits: 0,
         }).format(Number(price));
+
+    const addToCart = (product: Product) => {
+        if(product.stock <= 0) {
+            return;
+        }
+
+        setCart((prevCart) => {
+            const existingProduct = prevCart.find(
+                (item) => item.id === product.id
+            );
+
+            if(existingProduct) {
+                if(existingProduct.quantity >= product.stock) {
+                    return prevCart;
+                }
+
+                return prevCart.map((item) =>
+                    item.id === product.id ? {...item, quantity: item.quantity + 1} : item
+                );
+            }
+
+            return [...prevCart, {...product, quantity: 1}];
+        });
+    };
 
     return (
         <div className="min-h-screen p-5">
@@ -79,7 +108,7 @@ export default function TransactionsPage() {
             ): (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {products.map((product) => (
-                        <div key={product.id} className=" bg-gray-100 border border-gray-300 rounded-lg p-4 hover:border-red-700 hover:shadow-md transition">
+                        <div key={product.id} onClick={() => addToCart(product)} className=" bg-gray-100 border border-gray-300 rounded-lg p-4 hover:border-red-700 hover:shadow-md transition cursor-pointer hover:bg-gray-200">
                             <h2 className="font-semibold">
                                 {product.name}
                             </h2>
@@ -103,6 +132,35 @@ export default function TransactionsPage() {
                     ))}
                 </div>
             )}
+            </div>
+
+            <div>
+                <h2>
+                    Keranjang Transaksi
+                </h2>
+
+                {cart.length === 0 ? (
+                    <p>
+                        Belum ada produk yang dipilih
+                    </p>
+                ) : (
+                    <div>
+                        {cart.map((item) => (
+                            <div key={item.id}>
+                                <div>
+                                    <p>{item.name}</p>
+                                    <p>
+                                        {formatRp(item.price)} x {item.quantity}      
+                                    </p>
+                                </div>
+                                
+                                <p>
+                                    {formatRp(Number(item.price) * item.quantity)}
+                                </p>
+                            </div>
+                            ))}
+                    </div>
+                )}
             </div>
         </div>
     );
