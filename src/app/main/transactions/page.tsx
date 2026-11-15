@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {useRouter } from "next/navigation";
 
 type Product = {
     id: number;
@@ -17,7 +18,7 @@ export default function TransactionsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [cart, setCart] = useState<CartItem[]>([]);
+    const router = useRouter();
 
     useEffect(() => {
         async function fetchProducts() {
@@ -48,48 +49,40 @@ export default function TransactionsPage() {
         }).format(Number(price));
 
     const addToCart = (product: Product) => {
-        if(product.stock <= 0) {
+        if (product.stock <= 0) {
             return;
         }
 
-        setCart((prevCart) => {
-            const existingProduct = prevCart.find(
-                (item) => item.id === product.id
-            );
+        const savedCart = localStorage.getItem("cart");
+        const currentCart: CartItem[] = savedCart
+            ? JSON.parse(savedCart)
+            : [];
 
-            if(existingProduct) {
-                if(existingProduct.quantity >= product.stock) {
-                    return prevCart;
-                }
+        const existingProduct = currentCart.find(
+            (item) => item.id === product.id
+        );
 
-                return prevCart.map((item) =>
-                    item.id === product.id ? {...item, quantity: item.quantity + 1} : item
-                );
+        let updatedCart: CartItem[];
+
+        if (existingProduct) {
+            if (existingProduct.quantity >= product.stock) {
+                return;
             }
 
-            return [...prevCart, {...product, quantity: 1}];
-        });
+            updatedCart = currentCart.map((item) =>
+                item.id === product.id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            );
+        } else {
+            updatedCart = [...currentCart, { ...product, quantity: 1 }];
+        }
+
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+        router.push("/main/cart");
     };
 
-    const updateQuantity = (id: number, amount: number) => {
-        setCart((prevCart) =>
-            prevCart.map((item) => {
-                if(item.id === id) {
-                    const newQuantity = item.quantity + amount;
-
-                    if(newQuantity > item.stock) {
-                        return item;
-                    }
-                    return {...item, quantity: newQuantity};
-                }
-                return item;
-            }).filter((item) => item.quantity > 0)
-        );
-    };
-
-    const total = cart.reduce(
-        (sum, item) => sum + Number(item.price) * item.quantity, 0
-    );
 
     return (
         <div className="min-h-screen p-5">
@@ -150,48 +143,6 @@ export default function TransactionsPage() {
                     ))}
                 </div>
             )}
-            </div>
-
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 mt-5">
-                <h2 className="font-bold text-lg mb-4">
-                    Keranjang Transaksi
-                </h2>
-
-                {cart.length === 0 ? (
-                    <p className="text-sm">
-                        Belum ada produk yang dipilih
-                    </p>
-                ) : (
-                    <div>
-                        {cart.map((item) => (
-                            <div key={item.id} className="flex justify-between border-b py-3">
-                                <div>
-                                    <p className="font-semibold">{item.name}</p>
-                                    <p className="text-sm text-gray-500">
-                                        {formatRp(item.price)} x {item.quantity}      
-                                    </p>
-                                </div>
-                                
-                                <p className="font-semibold">
-                                    {formatRp(Number(item.price) * item.quantity)}
-                                </p>
-
-                                <div>
-                                    <button onClick={() => updateQuantity(item.id, -1)} className="border rounded px-1 m-2">-</button>
-
-                                    <span>{item.quantity}</span>
-                                    <button onClick={() => updateQuantity(item.id, 1)} className="border rounded px-1 m-2">+</button>
-                                </div>
-                            </div>
-                            ))}
-                            
-                            <div className="flex justify-between mt-5">
-                                <h3 className="font-bold">Total: </h3>
-
-                                <p className="font-bold text-red-600">{formatRp(total)}</p>
-                            </div>
-                    </div>
-                )}
             </div>
         </div>
     );
