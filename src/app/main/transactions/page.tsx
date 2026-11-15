@@ -134,27 +134,27 @@ export default function TransactionsPage() {
             )}
             </div>
 
-            <div>
-                <h2>
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 mt-5">
+                <h2 className="font-bold text-lg mb-4">
                     Keranjang Transaksi
                 </h2>
 
                 {cart.length === 0 ? (
-                    <p>
+                    <p className="text-sm">
                         Belum ada produk yang dipilih
                     </p>
                 ) : (
                     <div>
                         {cart.map((item) => (
-                            <div key={item.id}>
+                            <div key={item.id} className="flex justify-between border-b py-3">
                                 <div>
-                                    <p>{item.name}</p>
-                                    <p>
+                                    <p className="font-semibold">{item.name}</p>
+                                    <p className="text-sm text-gray-500">
                                         {formatRp(item.price)} x {item.quantity}      
                                     </p>
                                 </div>
                                 
-                                <p>
+                                <p className="font-semibold">
                                     {formatRp(Number(item.price) * item.quantity)}
                                 </p>
                             </div>
