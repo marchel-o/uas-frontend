@@ -39,6 +39,39 @@ export default function PaymentPage() {
     const change = Number(amountPaid) - total;
     const paymentValid = cart.length > 0 && amountPaid !== "" && Number(amountPaid) >= total;
 
+    const handlePayment = async () => {
+        try {
+            const response = await fetch("/api/transactions", {
+                method: "POST", headers: {
+                    "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify({
+                    userId: 1,
+                    items: cart.map((item) => ({
+                        productId: item.id,
+                        quantity: item.quantity,
+                    })),
+                    method, amountPaid: Number(amountPaid),
+                }),
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Transaksi gagal");
+            }
+
+            localStorage.removeItem("cart");
+            localStorage.setItem("lastTransaction", JSON.stringify(result.data)
+            );
+
+            window.location.href = "/main/success";
+        } catch (error) {
+            alert(
+                error instanceof Error ? error.message: "Terjadi kesalahan"
+            );
+        }
+    };
+
     return(
         <div className="min-h-screen p-5">
             <div className="mb-8">
@@ -99,7 +132,7 @@ export default function PaymentPage() {
                         </p>
                     )}
 
-                    <button disabled={!paymentValid} className="w-full bg-red-700 text-white rounded-xl p-4 font-bold hover:bg-red-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <button onClick={handlePayment} disabled={!paymentValid} className="w-full bg-red-700 text-white rounded-xl p-4 font-bold hover:bg-red-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Proses pembayaran
                     </button>
 
