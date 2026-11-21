@@ -56,15 +56,15 @@ export default function HistoryPage() {
         }).format(Number(price));
 
     return(
-        <div>
-            <div>
-                <h1>Riwayat Transaksi</h1>
+        <div className="min-h-screen p-5">
+            <div className="mb-8">
+                <h1 className="font-bold text-2xl uppercase">Riwayat Transaksi</h1>
             </div>
 
-            <div>
-                <div>
-                    <h2>Daftar Transaksi</h2>
-                    <span>Total {transactions.length} transaksi</span>
+            <div className="bg-white rounded-xl p-5 border shadow-xl border-gray-200">
+                <div className="flex justify-between mb-5">
+                    <h2 className="text-lg font-semibold">Daftar Transaksi</h2>
+                    <span className="text-sm text-gray-600">Total {transactions.length} transaksi</span>
                 </div>
 
                 {loading ? (
@@ -74,33 +74,33 @@ export default function HistoryPage() {
                 ) : transactions.length === 0 ? (
                     <p>Belum ada transaksi</p>
                 ) : (
-                    <div>
-                        <table>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-center">
                             <thead>
-                                <tr>
-                                    <th>Invoice</th>
-                                    <th>Tanggal</th>
-                                    <th>Kasir</th>
-                                    <th>Produk</th>
-                                    <th>Metode</th>
-                                    <th>Total</th>
+                                <tr className="border-b border-gray-400">
+                                    <th className="p-3">Invoice</th>
+                                    <th className="p-3">Tanggal</th>
+                                    <th className="p-3">Kasir</th>
+                                    <th className="p-3">Produk</th>
+                                    <th className="p-3">Metode</th>
+                                    <th className="p-3">Total</th>
                                 </tr>
                             </thead>
 
                             <tbody>
                                 {transactions.map((transaction) => (
-                                    <tr key={transaction.id}>
-                                        <td>{transaction.invoice}</td>
-                                        <td>{new Date(transaction.createdAt).toLocaleString("id-ID")}</td>
-                                        <td>{transaction.user?.name}</td>
+                                    <tr key={transaction.id} className="border-b hover:bg-gray-200 cursor-pointer">
+                                        <td className="font-medium">{transaction.invoice}</td>
+                                        <td className="p-3">{new Date(transaction.createdAt).toLocaleString("id-ID")}</td>
+                                        <td className="">{transaction.user?.name}</td>
                                         <td>{transaction.items.map((item, index) => (
                                             <p key={index}>{item.product.name} x {item.quantity}</p>
                                             )
                                             )}
                                         </td>
 
-                                        <td>{transaction.payment?.method}</td>
-                                        <td>{formatRp(transaction.total)}</td>
+                                        <td className="capitalize">{transaction.payment?.method}</td>
+                                        <td className="font-semibold text-green-700">{formatRp(transaction.total)}</td>
                                     </tr>
                                 ))}
                             </tbody>
