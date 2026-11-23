@@ -85,7 +85,7 @@ export default function TransactionsPage() {
 
 
     return (
-        <div className="min-h-screen p-5">
+        <div className="min-h-screen">
             <div className="mb-8">
                 <h1 className="text-2xl font-bold ">
                     Halaman Transaksi Kasir
