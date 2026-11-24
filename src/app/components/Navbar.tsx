@@ -13,7 +13,7 @@ export function Navbar(){
     { name: "Produk", link: "/main/products" },
     { name: "Transaksi", link: "/main/transactions" },
     { name: "Riwayat", link: "/main/history" },
-    { name: "Laporan", link: "/"},
+    { name: "Laporan", link: "/main/laporan" },
     { name: "Pengaturan", link: "/main/settings" },
   ]
 
