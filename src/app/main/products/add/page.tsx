@@ -1,13 +1,8 @@
 'use client'
 
 import React from "react"
+import { ProductForm } from "../_components/ProductForm"
 
 export default function AddProduct() {
-    return (
-        <>
-            <h1 className="font-bold text-2xl">
-                Halaman Tambah Produk
-            </h1>
-        </>
-    )
+    return <ProductForm />
 }

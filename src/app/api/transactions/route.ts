@@ -52,6 +52,10 @@ export async function POST(request: NextRequest) {
           throw new Error("Data produk atau jumlah tidak valid");
         }
 
+        if (!product.isActive) {
+          throw new Error(`Produk "${product.name}" sudah tidak aktif`);
+        }
+
         if (product.stock < quantity) {
           throw new Error(`Stok ${product.name} tidak mencukupi`);
         }
