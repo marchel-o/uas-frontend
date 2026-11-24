@@ -1,12 +1,46 @@
 'use client'
 
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 
 export default function Login(){
-  const handleLogin = (e: React.SubmitEvent) => {
+  const router = useRouter();
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    redirect("/main/dashboard");
-  }
+
+    setError("");
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message);
+        return;
+      }
+
+      router.push("/main/dashboard");
+      router.refresh();
+    } catch {
+      setError("Gagal terhubung ke server");
+    }
+  };
 
   return(
     <div className="rounded-xl p-4 bg-[var(--surface)] shadow-lg">
@@ -17,13 +51,15 @@ export default function Login(){
           className="border border-gray-300 p-0.5 px-2 rounded-md"
           type="text"
           placeholder="Name"
-          defaultValue="admin"
+          onChange={(e) => setUsername(e.target.value)}
+          value={username}
         />
         <input
           className="border border-gray-300 p-0.5 px-2 rounded-md"
           type="password"
           placeholder="Password"
-          defaultValue="123"
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
         />
 
         <button

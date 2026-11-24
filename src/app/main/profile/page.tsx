@@ -2,9 +2,34 @@
 
 import { LockKeyhole, LogOut, User } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Profile(){
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [logoutPopup, setLogoutPopup] = useState<boolean>(false);
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Logout gagal");
+      }
+
+      router.replace("/auth/login");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert("Gagal melakukan logout. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return(
     <>
@@ -64,8 +89,19 @@ export default function Profile(){
         <p className="min-w-fit text-center mt-3 text-[var(--text-secondary)]">Yakin ingin keluar?</p>
 
         <div className="text-blue-500 font-medium flex gap-4 mt-4">
-          <a className="text-center p-2 w-full rounded-lg cursor-pointer" onClick={() => setLogoutPopup(false)}>Tidak</a>
-          <a href="/auth/login" className="text-center p-2 w-full rounded-lg cursor-pointer">Ya</a>
+          <button 
+            className="text-center p-2 w-full rounded-lg cursor-pointer" 
+            onClick={() => setLogoutPopup(false)}
+          >
+            Tidak
+          </button>
+
+          <button
+            className="text-center p-2 w-full rounded-lg cursor-pointer" 
+            onClick={handleLogout}
+          >
+              Ya
+          </button>
         </div>
       </div>
     </>
