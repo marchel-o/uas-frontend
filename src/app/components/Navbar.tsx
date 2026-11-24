@@ -1,6 +1,6 @@
 'use client'
 
-import { TextAlignJustify, X, Box, NotepadText, Settings, MonitorCloud } from 'lucide-react';
+import { TextAlignJustify, X, Box, NotepadText, Settings, MonitorCloud, FileText } from 'lucide-react';
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -21,6 +21,7 @@ export function Navbar(){
     { name: "Dashboard", link: "/main/dashboard", icon: (<MonitorCloud size={20} />) },
     { name: "Produk", link: "/main/products", icon: (<Box size={20} />) },
     { name: "Transaksi", link: "/main/transactions", icon: (<NotepadText size={20} />) },
+    { name: "Laporan", link: "/main/laporan", icon: (<FileText size={20} />) },
     { name: "Pengaturan", link: "/main/settings", icon: (<Settings size={20} />) },
   ]
   
