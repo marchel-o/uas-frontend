@@ -19,6 +19,7 @@ export default function TransactionsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const router = useRouter();
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         async function fetchProducts() {
@@ -83,6 +84,9 @@ export default function TransactionsPage() {
         router.push("/main/cart");
     };
 
+    const filterProduct = products.filter((product) =>
+        product.name.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <div className="min-h-screen">
@@ -102,9 +106,11 @@ export default function TransactionsPage() {
                         <h2 className="text-lg font-semibold">
                             Daftar Produk
                         </h2>
+                        
+                        <input type="text" placeholder="Cari Produk..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full border rounded-xl border-gray-300 px-5 py-2 mb-1 mt-2 focus:ring-4 focus:ring-red-400 focus:outline-none transition"/>
 
                         <span className="text-sm text-gray-500">
-                            {products.length} Produk
+                            {filterProduct.length} Produk
                         </span>
                     </div>
                 </div>
@@ -114,11 +120,11 @@ export default function TransactionsPage() {
                 <p>Memuat Produk...</p>
             ): error ? (
                 <p>{error}</p>
-            ): products.length === 0 ? (
+            ): filterProduct.length === 0 ? (
                 <p>Belum ada produk tersedia</p>
             ): (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {products.map((product) => (
+                    {filterProduct.map((product) => (
                         <div key={product.id} onClick={() => addToCart(product)} className=" bg-gray-100 border border-gray-300 rounded-lg p-4 hover:border-red-700 hover:shadow-md transition cursor-pointer hover:bg-gray-200">
                             <h2 className="font-semibold">
                                 {product.name}
