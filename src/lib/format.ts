@@ -1,7 +1,7 @@
 const CURRENCY = {
-  locale: "en-US",
-  code: "USD",
-  decimals: 2,
+  locale: "id-ID",
+  code: "IDR",
+  decimals: 0,
 };
 
 export function formatMoney(value: number | string | null | undefined): string {

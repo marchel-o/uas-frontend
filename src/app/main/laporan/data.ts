@@ -18,9 +18,9 @@ export const categoryClass = (category: Category) => categoryStyle[category] ?? 
 export const formatRupiah = (num: number) => formatMoney(num);
 
 export const shortRupiah = (num: number) => {
-  if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `$${(num / 1_000).toFixed(1)}K`;
-  return `$${num}`;
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)} jt`;
+  if (num >= 1_000) return `${Math.round(num / 1_000)} rb`;
+  return String(num);
 };
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
@@ -53,7 +53,7 @@ export function summarize(list: Transaction[]) {
   const revenue = list.reduce((s, t) => s + txTotal(t), 0);
   const qty = list.reduce((s, t) => s + txQty(t), 0);
   const count = list.length;
-  return { revenue, qty, count, avg: count ? revenue / count : 0 };
+  return { revenue, qty, count, avg: count ? Math.round(revenue / count) : 0 };
 }
 
 export function groupByDay(list: Transaction[], from: string, to: string) {

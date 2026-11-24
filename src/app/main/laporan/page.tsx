@@ -79,7 +79,7 @@ export default async function Ringkasan() {
 
       <div className="rounded-xl p-4 bg-[var(--surface)] shadow-lg">
         <p className="font-semibold">Pendapatan 7 Hari Terakhir</p>
-        <p className="text-[var(--text-secondary)] text-[.8rem] mb-3">Per hari, dalam dolar</p>
+        <p className="text-[var(--text-secondary)] text-[.8rem] mb-3">Per hari, dalam rupiah</p>
         <RevenueChart data={last7} />
       </div>
 
