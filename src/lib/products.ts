@@ -1,4 +1,8 @@
 import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
+
+export const MAX_PRICE = 9999999999.99;
+export const MAX_STOCK = 2147483647;
 
 export type ProductInput = {
   name: string;
@@ -56,6 +60,19 @@ export function prismaErrorCode(error: unknown) {
   return "";
 }
 
+export async function skuConflictMessage(sku: string) {
+  const existing = await prisma.product.findUnique({
+    where: { sku },
+    select: { isActive: true },
+  });
+
+  if (existing && !existing.isActive) {
+    return "SKU sudah terdaftar pada produk nonaktif, silakan aktifkan kembali";
+  }
+
+  return "SKU sudah dipakai produk lain";
+}
+
 export function parseId(value: string): number | null {
   const id = Number(value);
 
@@ -87,21 +104,24 @@ export function parseProductInput(
 
   const price = Number(body.price);
 
-  if (!Number.isFinite(price) || price <= 0) {
-    return { error: "Harga jual harus lebih dari 0" };
+  if (!Number.isFinite(price) || price <= 0 || price > MAX_PRICE) {
+    return { error: "Harga jual harus lebih dari 0 dan tidak melebihi 9.999.999.999,99" };
   }
 
   const buyPrice =
     body.buyPrice == null || body.buyPrice === "" ? null : Number(body.buyPrice);
 
-  if (buyPrice !== null && (!Number.isFinite(buyPrice) || buyPrice < 0)) {
-    return { error: "Harga beli tidak valid" };
+  if (
+    buyPrice !== null &&
+    (!Number.isFinite(buyPrice) || buyPrice < 0 || buyPrice > MAX_PRICE)
+  ) {
+    return { error: "Harga beli tidak valid atau melebihi 9.999.999.999,99" };
   }
 
   const stock = body.stock == null || body.stock === "" ? 0 : Number(body.stock);
 
-  if (!Number.isInteger(stock) || stock < 0) {
-    return { error: "Stok harus bilangan bulat 0 atau lebih" };
+  if (!Number.isInteger(stock) || stock < 0 || stock > MAX_STOCK) {
+    return { error: "Stok harus bilangan bulat 0 sampai 2.147.483.647" };
   }
 
   const categoryId = Number(body.categoryId);
@@ -140,8 +160,8 @@ export function parseProductPatch(
   if (body.price !== undefined) {
     const price = Number(body.price);
 
-    if (!Number.isFinite(price) || price <= 0) {
-      return { error: "Harga jual harus lebih dari 0" };
+    if (!Number.isFinite(price) || price <= 0 || price > MAX_PRICE) {
+      return { error: "Harga jual harus lebih dari 0 dan tidak melebihi 9.999.999.999,99" };
     }
 
     data.price = price;
@@ -150,8 +170,8 @@ export function parseProductPatch(
   if (body.stock !== undefined) {
     const stock = Number(body.stock);
 
-    if (!Number.isInteger(stock) || stock < 0) {
-      return { error: "Stok harus bilangan bulat 0 atau lebih" };
+    if (!Number.isInteger(stock) || stock < 0 || stock > MAX_STOCK) {
+      return { error: "Stok harus bilangan bulat 0 sampai 2.147.483.647" };
     }
 
     data.stock = stock;
@@ -160,6 +180,10 @@ export function parseProductPatch(
   if (body.isActive !== undefined) {
     if (typeof body.isActive !== "boolean") {
       return { error: "Status produk tidak valid" };
+    }
+
+    if (!body.isActive) {
+      return { error: "Untuk mengarsipkan produk gunakan hapus produk" };
     }
 
     data.isActive = body.isActive;

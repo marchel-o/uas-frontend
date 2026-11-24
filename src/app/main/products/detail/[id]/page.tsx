@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Box, Edit, Trash2 } from "lucide-react"
+import { ArrowLeft, Box, Edit, RotateCcw, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import React, { useEffect, useState } from "react"
@@ -27,6 +27,8 @@ export default function ProductDetail() {
     const [deletePopup, setDeletePopup] = useState(false)
     const [deleting, setDeleting] = useState(false)
     const [deleteError, setDeleteError] = useState("")
+    const [restoring, setRestoring] = useState(false)
+    const [restoreError, setRestoreError] = useState("")
 
     useEffect(() => {
         async function fetchProduct() {
@@ -56,6 +58,34 @@ export default function ProductDetail() {
             minimumFractionDigits: 0,
         }).format(num);
     };
+
+    const handleRestore = async () => {
+        if (!product) return
+
+        setRestoreError("")
+
+        try {
+            setRestoring(true)
+
+            const response = await fetch(`/api/products/${product.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isActive: true }),
+            })
+            const result = await response.json()
+
+            if (!response.ok || !result.success) {
+                setRestoreError(result.message || "Gagal memulihkan produk")
+                return
+            }
+
+            setProduct(result.data)
+        } catch {
+            setRestoreError("Gagal terhubung ke server")
+        } finally {
+            setRestoring(false)
+        }
+    }
 
     const closeDelete = () => {
         setDeletePopup(false)
@@ -130,25 +160,39 @@ export default function ProductDetail() {
                         </div>
 
                         <div className="flex justify-center gap-2 mt-4 md:mt-0 md:ml-auto">
-                            <Link
-                                href={`/main/products/edit/${product.id}`}
-                                className="flex items-center gap-1.5 p-2 px-3 bg-[var(--primary)] text-white rounded-lg text-sm cursor-pointer hover:bg-[var(--primary-hover)] transition-all"
-                            >
-                                <Edit size={16} />
-                                <span>Edit</span>
-                            </Link>
-                            {product.isActive && (
+                            {product.isActive ? (
+                                <>
+                                    <Link
+                                        href={`/main/products/edit/${product.id}`}
+                                        className="flex items-center gap-1.5 p-2 px-3 bg-[var(--primary)] text-white rounded-lg text-sm cursor-pointer hover:bg-[var(--primary-hover)] transition-all"
+                                    >
+                                        <Edit size={16} />
+                                        <span>Edit</span>
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => setDeletePopup(true)}
+                                        className="flex items-center gap-1.5 p-2 px-3 bg-red-50 text-red-600 rounded-lg text-sm cursor-pointer hover:bg-red-100 transition-all"
+                                    >
+                                        <Trash2 size={16} />
+                                        <span>Hapus</span>
+                                    </button>
+                                </>
+                            ) : (
                                 <button
                                     type="button"
-                                    onClick={() => setDeletePopup(true)}
-                                    className="flex items-center gap-1.5 p-2 px-3 bg-red-50 text-red-600 rounded-lg text-sm cursor-pointer hover:bg-red-100 transition-all"
+                                    disabled={restoring}
+                                    onClick={handleRestore}
+                                    className="flex items-center gap-1.5 p-2 px-3 bg-[var(--primary)] text-white rounded-lg text-sm cursor-pointer hover:bg-[var(--primary-hover)] disabled:opacity-50 transition-all"
                                 >
-                                    <Trash2 size={16} />
-                                    <span>Hapus</span>
+                                    <RotateCcw size={16} />
+                                    <span>{restoring ? "Memulihkan..." : "Aktifkan Kembali"}</span>
                                 </button>
                             )}
                         </div>
                     </div>
+
+                    {restoreError && <p className="text-red-500 text-sm text-center md:text-right mt-2">{restoreError}</p>}
 
                     <div className="w-full h-[.06rem] bg-gray-800 opacity-15 my-6"></div>
 
@@ -172,6 +216,10 @@ export default function ProductDetail() {
 
                     <p className="text-[var(--text-secondary)] text-sm mt-2">Stok Tersedia</p>
                     <p className="font-semibold">{product.stock} pcs</p>
+
+                    {!product.isActive && (
+                        <p className="text-[var(--text-secondary)] text-sm mt-1">Stok 0, perbarui stok lewat Edit</p>
+                    )}
 
                     <p className="text-[var(--text-secondary)] text-sm mt-2">Lokasi Rak</p>
                     <p className="font-semibold">—</p>

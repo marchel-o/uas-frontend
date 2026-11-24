@@ -5,6 +5,7 @@ import {
   parseProductInput,
   prismaErrorCode,
   productSelect,
+  skuConflictMessage,
 } from "@/lib/products";
 
 export async function GET(request: NextRequest) {
@@ -15,11 +16,19 @@ export async function GET(request: NextRequest) {
     const categoryIdParam = params.get("categoryId");
     const pageParam = params.get("page");
     const limitParam = params.get("limit");
+    const status = params.get("status") ?? "active";
+
+    if (!["active", "inactive", "all"].includes(status)) {
+      return NextResponse.json(
+        { success: false, message: "Parameter status tidak valid" },
+        { status: 400 }
+      );
+    }
 
     const where: Prisma.ProductWhereInput = {};
 
-    if (params.get("includeInactive") !== "1") {
-      where.isActive = true;
+    if (status !== "all") {
+      where.isActive = status === "active";
     }
 
     if (q) {
@@ -101,17 +110,17 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+  const parsed = parseProductInput(body);
+
+  if ("error" in parsed) {
+    return NextResponse.json(
+      { success: false, message: parsed.error },
+      { status: 400 }
+    );
+  }
+
   try {
-    const body = await request.json().catch(() => null);
-    const parsed = parseProductInput(body);
-
-    if ("error" in parsed) {
-      return NextResponse.json(
-        { success: false, message: parsed.error },
-        { status: 400 }
-      );
-    }
-
     const product = await prisma.product.create({
       data: parsed.data,
       select: productSelect,
@@ -130,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     if (code === "P2002") {
       return NextResponse.json(
-        { success: false, message: "SKU sudah dipakai produk lain" },
+        { success: false, message: await skuConflictMessage(parsed.data.sku) },
         { status: 409 }
       );
     }

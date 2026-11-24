@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, ChevronDown, Eye, Pencil, Plus, Search, Tags, Trash2 } from "lucide-react"
+import { Box, ChevronDown, Eye, Pencil, Plus, RotateCcw, Search, Tags, Trash2 } from "lucide-react"
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 
@@ -24,8 +24,11 @@ export default function Products() {
     const [search, setSearch] = useState("")
     const [debouncedSearch, setDebouncedSearch] = useState("")
     const [categoryId, setCategoryId] = useState("")
+    const [status, setStatus] = useState("active")
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+    const [actionError, setActionError] = useState("")
+    const [restoringId, setRestoringId] = useState<number | null>(null)
 
     const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
     const [deleting, setDeleting] = useState(false)
@@ -55,15 +58,19 @@ export default function Products() {
     }, [])
 
     useEffect(() => {
+        let ignore = false
+
         async function fetchProducts() {
             try {
                 setLoading(true)
                 setError("")
+                setActionError("")
 
                 const params = new URLSearchParams()
 
                 if (debouncedSearch) params.set("q", debouncedSearch)
                 if (categoryId) params.set("categoryId", categoryId)
+                if (status !== "active") params.set("status", status)
 
                 const query = params.toString()
                 const response = await fetch(`/api/products${query ? `?${query}` : ""}`)
@@ -73,16 +80,20 @@ export default function Products() {
                     throw new Error(result.message || "Gagal mengambil data produk")
                 }
 
-                setProducts(result.data)
+                if (!ignore) setProducts(result.data)
             } catch (error) {
-                setError(error instanceof Error ? error.message : "Terjadi kesalahan")
+                if (!ignore) setError(error instanceof Error ? error.message : "Terjadi kesalahan")
             } finally {
-                setLoading(false)
+                if (!ignore) setLoading(false)
             }
         }
 
         fetchProducts()
-    }, [debouncedSearch, categoryId])
+
+        return () => {
+            ignore = true
+        }
+    }, [debouncedSearch, categoryId, status])
 
     const formatRupiah = (num: number) => {
         return new Intl.NumberFormat("id-ID", {
@@ -99,6 +110,32 @@ export default function Products() {
     }
 
     const isFiltering = debouncedSearch !== "" || categoryId !== ""
+
+    const handleRestore = async (product: Product) => {
+        setActionError("")
+
+        try {
+            setRestoringId(product.id)
+
+            const response = await fetch(`/api/products/${product.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isActive: true }),
+            })
+            const result = await response.json()
+
+            if (!response.ok || !result.success) {
+                setActionError(result.message || "Gagal memulihkan produk")
+                return
+            }
+
+            setProducts((prev) => prev.filter((item) => item.id !== product.id))
+        } catch {
+            setActionError("Gagal terhubung ke server")
+        } finally {
+            setRestoringId(null)
+        }
+    }
 
     const closeDelete = () => {
         setDeleteTarget(null)
@@ -170,6 +207,21 @@ export default function Products() {
                         />
                     </div>
 
+                    <div className="relative w-full sm:w-40">
+                        <select
+                            className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm outline-none cursor-pointer hover:bg-gray-50 transition-all"
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                        >
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                            <ChevronDown size={16} />
+                        </div>
+                    </div>
+
                     <div className="relative w-full sm:w-52">
                         <select
                             className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm outline-none cursor-pointer hover:bg-gray-50 transition-all"
@@ -200,13 +252,19 @@ export default function Products() {
                     </div>
                 </div>
 
+                {actionError && <p className="text-red-500 text-sm mt-4">{actionError}</p>}
+
                 {loading ? (
                     <p className="text-[var(--text-secondary)] text-sm mt-4">Memuat produk...</p>
                 ) : error ? (
                     <p className="text-red-500 text-sm mt-4">{error}</p>
                 ) : products.length === 0 ? (
                     <p className="text-[var(--text-secondary)] text-sm mt-4">
-                        {isFiltering ? "Tidak ada produk yang cocok dengan pencarian atau filter" : "Belum ada produk"}
+                        {isFiltering
+                            ? "Tidak ada produk yang cocok dengan pencarian atau filter"
+                            : status === "inactive"
+                                ? "Tidak ada produk nonaktif"
+                                : "Belum ada produk"}
                     </p>
                 ) : (
                     <div className="mt-3 flex flex-col gap-2">
@@ -239,21 +297,35 @@ export default function Products() {
                                         >
                                             <Eye size={16} />
                                         </Link>
-                                        <Link
-                                            href={`/main/products/edit/${product.id}`}
-                                            aria-label={`Ubah ${product.name}`}
-                                            className="p-2 bg-red-50 text-[var(--primary)] rounded-lg cursor-pointer hover:bg-red-100 transition-all"
-                                        >
-                                            <Pencil size={16} />
-                                        </Link>
-                                        <button
-                                            type="button"
-                                            onClick={() => setDeleteTarget(product)}
-                                            aria-label={`Hapus ${product.name}`}
-                                            className="p-2 bg-red-50 text-red-600 rounded-lg cursor-pointer hover:bg-red-100 transition-all"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {status === "active" ? (
+                                            <>
+                                                <Link
+                                                    href={`/main/products/edit/${product.id}`}
+                                                    aria-label={`Ubah ${product.name}`}
+                                                    className="p-2 bg-red-50 text-[var(--primary)] rounded-lg cursor-pointer hover:bg-red-100 transition-all"
+                                                >
+                                                    <Pencil size={16} />
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDeleteTarget(product)}
+                                                    aria-label={`Hapus ${product.name}`}
+                                                    className="p-2 bg-red-50 text-red-600 rounded-lg cursor-pointer hover:bg-red-100 transition-all"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                disabled={restoringId === product.id}
+                                                onClick={() => handleRestore(product)}
+                                                className="flex items-center gap-1.5 p-2 px-3 bg-[var(--primary)] text-white rounded-lg text-sm cursor-pointer hover:bg-[var(--primary-hover)] disabled:opacity-50 transition-all"
+                                            >
+                                                <RotateCcw size={16} />
+                                                <span>{restoringId === product.id ? "Memulihkan..." : "Pulihkan"}</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
