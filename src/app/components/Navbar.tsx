@@ -1,6 +1,6 @@
 'use client'
 
-import { TextAlignJustify, X, Box, NotepadText, Settings, MonitorCloud } from 'lucide-react';
+import { TextAlignJustify, X, Box, NotepadText, Settings, MonitorCloud, FileText } from 'lucide-react';
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -11,17 +11,19 @@ export function Navbar(){
 
   const sideLinks = [
     { name: "Dashboard", link: "/main/dashboard" },
-    { name: "Produk", link: "/" },
+    { name: "Produk", link: "/main/products" },
     { name: "Transaksi", link: "/main/transactions" },
-    { name: "Laporan", link: "/"},
+    { name: "Riwayat", link: "/main/history" },
+    { name: "Laporan", link: "/main/laporan" },
     { name: "Pengaturan", link: "/main/settings" },
     { name: "Supplier", link: "/main/supplier" },
   ]
 
   const bottomLinks = [
     { name: "Dashboard", link: "/main/dashboard", icon: (<MonitorCloud size={20} />) },
-    { name: "Produk", link: "/", icon: (<Box size={20} />) },
+    { name: "Produk", link: "/main/products", icon: (<Box size={20} />) },
     { name: "Transaksi", link: "/main/transactions", icon: (<NotepadText size={20} />) },
+    { name: "Laporan", link: "/main/laporan", icon: (<FileText size={20} />) },
     { name: "Pengaturan", link: "/main/settings", icon: (<Settings size={20} />) },
   ]
   

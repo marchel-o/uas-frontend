@@ -1,5 +1,3 @@
-'use client'
-
 import { ChevronRight, Database, Store, User } from "lucide-react";
 import React from "react";
 

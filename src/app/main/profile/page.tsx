@@ -1,10 +1,76 @@
 'use client'
 
 import { LockKeyhole, LogOut, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+type userData = {
+  id: number;
+  name: string;
+  username: string;
+  role: string;
+  phone: string | null;
+  avatar: string | null;
+  createdAt: string;
+}
 
 export default function Profile(){
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [logoutPopup, setLogoutPopup] = useState<boolean>(false);
+  const [data, setData] = useState<userData | null>(null);
+
+  
+  useEffect(() => {
+    const getData = async () => {
+      try{
+        const response = await fetch("/api/profile", { method: "GET" })
+
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data user");
+        }
+        
+        const result = await response.json();
+        setData(result.data);
+      } catch (error){
+        console.error(error);
+      }
+    }
+
+    getData();
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+
+      if (!response.ok) {
+        throw new Error("Logout gagal");
+      }
+
+      router.replace("/auth/login");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert("Gagal melakukan logout. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+  if (!data) return;
+
+  const formatDate = (date: string) => {
+    return new Intl.DateTimeFormat("id-ID", {
+      timeZone: "Asia/Jakarta",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(new Date(date));
+  }
 
   return(
     <>
@@ -20,8 +86,12 @@ export default function Profile(){
           </div>
 
           <div className="text-center md:text-left md:ml-4 md:flex md:flex-col md:justify-center">
-            <p className="font-semibold mt-3 md:mt-0">Andi Saputra</p>
-            <p className="text-[var(--text-secondary)] text-[0.8rem]">Administrator</p>
+            <p className="font-semibold mt-3 md:mt-0">{data.username}</p>
+
+            <p className="text-[var(--text-secondary)] text-[0.8rem]">
+              {data.role == "admin" ? "Administrator" : "Cashier"}
+            </p>
+
             <p className="text-[var(--primary)] text-sm mt-1 font-semibold cursor-pointer">Ubah Foto</p>
           </div>
         </div>
@@ -30,11 +100,13 @@ export default function Profile(){
 
         <h3 className="font-bold text-[1.05rem] mt-4">Informasi Pribadi</h3>
         <p className="text-[var(--text-secondary)] text-sm mt-2">Nama</p>
-        <p className="font-semibold">Andi Saputra</p>
-        <p className="text-[var(--text-secondary)] text-sm mt-2">Email</p>
-        <p className="font-semibold">Andi@gmail.com</p>
+        <p className="font-semibold">{data.name}</p>
+
         <p className="text-[var(--text-secondary)] text-sm mt-2">Nomor Telepon</p>
-        <p className="font-semibold">0812-1234-5678</p>
+        <p className="font-semibold">{data.phone ? data.phone : '-'}</p>
+
+        <p className="text-[var(--text-secondary)] text-sm mt-2">Bergabung Sejak</p>
+        <p className="font-semibold">{formatDate(data.createdAt)}</p>
       </div>
 
       <div className="rounded-xl p-4 bg-[var(--surface)] shadow-lg">
@@ -64,8 +136,19 @@ export default function Profile(){
         <p className="min-w-fit text-center mt-3 text-[var(--text-secondary)]">Yakin ingin keluar?</p>
 
         <div className="text-blue-500 font-medium flex gap-4 mt-4">
-          <a className="text-center p-2 w-full rounded-lg cursor-pointer" onClick={() => setLogoutPopup(false)}>Tidak</a>
-          <a href="/auth/login" className="text-center p-2 w-full rounded-lg cursor-pointer">Ya</a>
+          <button 
+            className="text-center p-2 w-full rounded-lg cursor-pointer" 
+            onClick={() => setLogoutPopup(false)}
+          >
+            Tidak
+          </button>
+
+          <button
+            className="text-center p-2 w-full rounded-lg cursor-pointer" 
+            onClick={handleLogout}
+          >
+              Ya
+          </button>
         </div>
       </div>
     </>
