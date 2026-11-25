@@ -1,3 +1,4 @@
+import { getDashboardData } from '@/services/getDashboardData';
 import { 
   Banknote, 
   ShoppingCart, 
@@ -5,76 +6,58 @@ import {
   Calendar
 } from 'lucide-react';
 
-export default function Dashboard(){
-  const date = new Date();
+export default async function Dashboard(){
+  const currentDate = new Date();
+  
+  const { 
+    todaySales,
+    todayTransactions,
+    todayQuantity,
+    recentTransactions,
+    salesPercentage,
+    quantityPercentage,
+    transactionsPercentage
+  } = await getDashboardData();
 
   const cards = [
     {
       icon: (<Banknote size={26} className="p-1 bg-gray-200 rounded text-gray-500" />),
       title: "Total Penjualan",
       amount: {
-        text: 1500.25,
+        text: todaySales,
         currency: true,
         text2: "",
       },
       percentage: {
-        text: "+5% than yesterday",
-        green: true
+        text: `${salesPercentage.toFixed(0)}% than yesterday`,
+        green: salesPercentage >= 0
       }
     },
     {
       icon: (<ShoppingCart size={26} className="p-1 bg-gray-200 rounded text-gray-500" />),
       title: "Jumlah Transaksi",
       amount: {
-        text: 68,
+        text: todayTransactions,
         currency: false,
         text2: "transaksi",
       },
       percentage: {
-        text: "-10% than yesterday",
-        green: false
+        text: `${transactionsPercentage.toFixed(0)}% than yesterday`,
+        green: transactionsPercentage >= 0
       }
     },
     {
       icon: (<PackageCheck size={26} className="p-1 bg-gray-200 rounded text-gray-500" />),
       title: "Produk Terjual",
       amount: {
-        text: 350,
+        text: todayQuantity,
         currency: false,
         text2: "pcs",
       },
       percentage: {
-        text: "+15% than yesterday",
-        green: true
+        text: `${quantityPercentage.toFixed(0)}% than yesterday`,
+        green: quantityPercentage >= 0
       }
-    },
-  ]
-
-  const transactions = [
-    {
-      id: "TRX-001",
-      price: 250000,
-      time: "10:00"
-    },
-    {
-      id: "TRX-002",
-      price: 350000,
-      time: "11:00"
-    },
-    {
-      id: "TRX-003",
-      price: 150000,
-      time: "12:00"
-    },
-    {
-      id: "TRX-004",
-      price: 200000,
-      time: "13:00"
-    },
-    {
-      id: "TRX-005",
-      price: 100000,
-      time: "14:00"
     },
   ]
 
@@ -86,7 +69,6 @@ export default function Dashboard(){
     }).format(num);
   };
 
-  
   return (
     <>
       <div>
@@ -97,13 +79,13 @@ export default function Dashboard(){
         
         <div className="flex items-center gap-1.5 mt-2 text-[var(--text-secondary)] text-[0.85rem]">
           <Calendar size={18} />
-          <p className="mt-[0.2rem]">{date.getDate()} - {date.getMonth() + 1} - {date.getFullYear()}</p>
+          <p className="mt-[0.2rem]">{currentDate.getDate()} - {currentDate.getMonth() + 1} - {currentDate.getFullYear()}</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2">
-        {cards.map((item) => (
-          <div key={item.title} className="relative rounded-xl p-4 bg-[var(--surface)] shadow-lg">
+        {cards.map((item, i) => (
+          <div key={i} className="relative rounded-xl p-4 bg-[var(--surface)] shadow-lg">
             <div className="flex items-center gap-2">
               {item.icon}
               <p className="font-semibold text-[.9em]">{item.title}</p>
@@ -111,7 +93,8 @@ export default function Dashboard(){
             
             <div className="flex justify-between mt-4">
               <p className="flex items-center gap-1.5 font-semibold text-2xl">
-                {item.amount.currency ? "$" : ""}{item.amount.text} <span className="text-sm text-[var(--text-secondary)]">{item.amount.text2}</span>
+                {item.amount.currency ? formatRupiah(item.amount.text) : item.amount.text} 
+                <span className="text-sm text-[var(--text-secondary)]">{item.amount.text2}</span>
               </p>
               
               <p 
@@ -131,14 +114,16 @@ export default function Dashboard(){
         </div>
         
         <div className="flex flex-col gap-2 mt-4">
-          {transactions.map((item) => (
+          {recentTransactions.map((item, i) => (
           <div key={item.id} className="flex justify-between">
             <div>
-              <p className="font-medium">{item.id}</p>
-              <p className="text-sm text-[var(--text-secondary)] font-semibold">{item.time}</p>
+              <p className="font-medium text-[.95rem]">{item.invoice}</p>
+              <p className="text-sm text-[var(--text-secondary)] font-semibold">
+                {item.createdAt.toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' }).replace(".", ':')}
+              </p>
             </div>
 
-            <p className="font-semibold">{formatRupiah(item.price)}</p>
+            <p className="font-semibold">{formatRupiah(Number(item.total))}</p>
           </div>
           ))}
         </div>
