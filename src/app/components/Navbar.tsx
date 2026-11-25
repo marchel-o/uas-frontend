@@ -12,6 +12,7 @@ export function Navbar(){
     { name: "Dashboard", link: "/main/dashboard" },
     { name: "Produk", link: "/main/products" },
     { name: "Transaksi", link: "/main/transactions" },
+    { name: "Riwayat", link: "/main/history" },
     { name: "Laporan", link: "/"},
     { name: "Pengaturan", link: "/main/settings" },
   ]
