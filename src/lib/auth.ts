@@ -13,6 +13,16 @@ function hashToken(token: string) {
 }
 
 export async function createSession(userId: number) {
+  const date = new Date();
+
+  await prisma.session.deleteMany({
+    where: {
+      expiresAt: {
+        lte: date,
+      }
+    }
+  })
+
   const token = randomBytes(32).toString("hex");
 
   const tokenHash = hashToken(token);

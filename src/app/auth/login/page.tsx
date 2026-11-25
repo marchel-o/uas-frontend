@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-
 export default function Login(){
   const router = useRouter();
 
@@ -69,6 +68,7 @@ export default function Login(){
           Login
         </button>
       </form>
+      <p>{error}</p>
     </div>
   )
 }
