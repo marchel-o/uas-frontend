@@ -139,7 +139,7 @@ export default function Profile(){
         >
             Pulihkan Data
           </button>
-        <p className="text-red-500 text-[.75rem] leading-4 mt-2">Pemulihan dapat mengubah data saat ini!</p>
+        <p className="text-red-500 text-[.8rem] leading-4 mt-2">Pemulihan dapat mengubah data saat ini!</p>
       </div>
     </>
   )
