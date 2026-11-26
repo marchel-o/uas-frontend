@@ -6,17 +6,17 @@ import { Plus, Search, Truck } from "lucide-react";
 
 export type Supplier = {
   id: number;
-  nama: string;
-  kontak?: string;
-  telepon: string;
-  email?: string;
-  alamat?: string;
+  name: string;
+  contactName: string | null;
+  phone: string;
+  email: string | null;
+  address: string | null;
 };
 
 const columns = [
-  { key: "nama", label: "Nama supplier" },
-  { key: "kontak", label: "Kontak" },
-  { key: "telepon", label: "Telepon" },
+  { key: "name", label: "Nama supplier" },
+  { key: "contactName", label: "Kontak" },
+  { key: "phone", label: "Telepon" },
   { key: "email", label: "Email" },
 ] as const;
 
@@ -95,7 +95,7 @@ export default function SupplierTable({ data }: { data: Supplier[] }) {
                     <td
                       key={c.key}
                       className={`px-4 py-3 ${
-                        c.key === "nama" ? "font-medium" : "text-[var(--text-secondary)]"
+                        c.key === "name" ? "font-medium" : "text-[var(--text-secondary)]"
                       }`}
                     >
                       {s[c.key] || "-"}

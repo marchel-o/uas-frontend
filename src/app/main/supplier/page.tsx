@@ -1,10 +1,23 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import SupplierTable, { type Supplier } from "../../components/supplier/SupplierTable";
+import { prisma } from "@/lib/prisma";
+import SupplierTable from "../../components/supplier/SupplierTable";
 
-const suppliers: Supplier[] = [];
+export const dynamic = "force-dynamic";
 
-export default function SupplierPage() {
+export default async function SupplierPage() {
+  const suppliers = await prisma.supplier.findMany({
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      contactName: true,
+      phone: true,
+      email: true,
+      address: true,
+    },
+  });
+
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-4">

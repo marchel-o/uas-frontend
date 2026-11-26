@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-type Values = Record<"nama" | "kontak" | "telepon" | "email" | "alamat", string>;
+type Values = Record<"name" | "contactName" | "phone" | "email" | "address", string>;
 
 const fields: {
   name: keyof Values;
@@ -13,41 +14,62 @@ const fields: {
   required?: boolean;
   rows?: number;
 }[] = [
-  { name: "nama", label: "Nama supplier", placeholder: "Contoh: PT Sumber Pangan", required: true },
-  { name: "kontak", label: "Nama kontak", placeholder: "Nama sales atau PIC" },
-  { name: "telepon", label: "Telepon", placeholder: "0812 3456 7890", type: "tel", required: true },
+  { name: "name", label: "Nama supplier", placeholder: "Contoh: PT Sumber Pangan", required: true },
+  { name: "contactName", label: "Nama kontak", placeholder: "Nama sales atau PIC" },
+  { name: "phone", label: "Telepon", placeholder: "0812 3456 7890", type: "tel", required: true },
   { name: "email", label: "Email", placeholder: "nama@perusahaan.com", type: "email" },
-  { name: "alamat", label: "Alamat", placeholder: "Alamat lengkap supplier", rows: 3 },
+  { name: "address", label: "Alamat", placeholder: "Alamat lengkap supplier", rows: 3 },
 ];
 
-const empty: Values = { nama: "", kontak: "", telepon: "", email: "", alamat: "" };
+const empty: Values = { name: "", contactName: "", phone: "", email: "", address: "" };
 
 function validate(v: Values) {
   const e: Partial<Values> = {};
-  if (!v.nama.trim()) e.nama = "Nama supplier wajib diisi.";
-  if (!v.telepon.trim()) e.telepon = "Nomor telepon wajib diisi.";
-  else if (!/^[0-9+\-\s()]{8,20}$/.test(v.telepon.trim()))
-    e.telepon = "Gunakan 8-20 karakter angka, spasi, +, -, atau tanda kurung.";
+  if (!v.name.trim()) e.name = "Nama supplier wajib diisi.";
+  if (!v.phone.trim()) e.phone = "Nomor telepon wajib diisi.";
+  else if (!/^[0-9+\-\s()]{8,20}$/.test(v.phone.trim()))
+    e.phone = "Gunakan 8-20 karakter angka, spasi, +, -, atau tanda kurung.";
   if (v.email && !/^\S+@\S+\.\S+$/.test(v.email.trim()))
     e.email = "Format email belum benar, contoh: nama@perusahaan.com.";
   return e;
 }
 
 export default function SupplierForm() {
+  const router = useRouter();
   const [values, setValues] = useState(empty);
   const [errors, setErrors] = useState<Partial<Values>>({});
-  const [saved, setSaved] = useState(false);
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     const found = validate(values);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
-    // TODO (Hari 3): ganti dengan POST ke /api/suppliers
-    console.log("Supplier baru:", values);
-    setValues(empty);
-    setSaved(true);
+    setLoading(true);
+    setServerError("");
+
+    try {
+      const res = await fetch("/api/suppliers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        setServerError(result.message || "Gagal menyimpan supplier");
+        return;
+      }
+
+      router.push("/main/supplier");
+      router.refresh();
+    } catch {
+      setServerError("Tidak dapat terhubung ke server. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -56,9 +78,9 @@ export default function SupplierForm() {
       noValidate
       className="space-y-5 rounded-xl p-4 bg-[var(--surface)] shadow-lg"
     >
-      {saved && (
-        <p role="status" className="rounded-lg bg-green-100 px-4 py-3 text-sm text-green-800">
-          Supplier berhasil ditambahkan.
+      {serverError && (
+        <p role="alert" className="rounded-lg bg-red-100 px-4 py-3 text-sm text-red-800">
+          {serverError}
         </p>
       )}
 
@@ -66,10 +88,8 @@ export default function SupplierForm() {
         const props = {
           value: values[name],
           placeholder,
-          onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            setValues({ ...values, [name]: e.target.value });
-            setSaved(false);
-          },
+          onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            setValues({ ...values, [name]: e.target.value }),
           className: `w-full rounded-lg border bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
             errors[name]
               ? "border-red-500 focus:ring-red-500/30"
@@ -100,9 +120,10 @@ export default function SupplierForm() {
         </Link>
         <button
           type="submit"
-          className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--text-light)] hover:bg-[var(--primary-hover)] transition-all cursor-pointer"
+          disabled={loading}
+          className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--text-light)] hover:bg-[var(--primary-hover)] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Simpan supplier
+          {loading ? "Menyimpan..." : "Simpan supplier"}
         </button>
       </div>
     </form>
