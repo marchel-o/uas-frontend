@@ -1,6 +1,6 @@
 'use client'
 
-import { TextAlignJustify, X, Box, NotepadText, Settings, MonitorCloud, FileText } from 'lucide-react';
+import { TextAlignJustify, X, Box, Boxes, NotepadText, Settings, MonitorCloud, FileText } from 'lucide-react';
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -12,6 +12,7 @@ export function Navbar(){
   const sideLinks = [
     { name: "Dashboard", link: "/main/dashboard" },
     { name: "Produk", link: "/main/products" },
+    { name: "Stok", link: "/main/stok" },
     { name: "Transaksi", link: "/main/transactions" },
     { name: "Riwayat", link: "/main/history" },
     { name: "Laporan", link: "/main/laporan" },
@@ -22,6 +23,7 @@ export function Navbar(){
   const bottomLinks = [
     { name: "Dashboard", link: "/main/dashboard", icon: (<MonitorCloud size={20} />) },
     { name: "Produk", link: "/main/products", icon: (<Box size={20} />) },
+    { name: "Stok", link: "/main/stok", icon: (<Boxes size={20} />) },
     { name: "Transaksi", link: "/main/transactions", icon: (<NotepadText size={20} />) },
     { name: "Pengaturan", link: "/main/settings", icon: (<Settings size={20} />) },
   ]
@@ -71,7 +73,7 @@ export function Navbar(){
 
       <nav className="fixed flex items-center justify-around bottom-0 left-0 w-full bg-white text-gray-800 border-t border-gray-300 z-8 p-2 sm:hidden">
         {bottomLinks.map((link, i) => {
-          const active = link.link === pathName;
+          const active = pathName === link.link || pathName.startsWith(link.link + "/");
 
           return (
             <a 

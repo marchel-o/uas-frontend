@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
           user: { select: { name: true, username: true } },
         },
         orderBy: [{ movedAt: "desc" }, { id: "desc" }],
-        ...(all ? { take: 5000 } : { skip: (page - 1) * pageSize, take: pageSize }),
+        ...(all ? { take: Number(5000) } : { skip: (page - 1) * pageSize, take: pageSize }),
       }),
     ]);
 
