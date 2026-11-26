@@ -16,7 +16,7 @@ export default async function MainLayout({
       <div className="flex min-h-screen">
         <Navbar />
 
-        <section className="flex flex-col flex-1 min-w-0 gap-4 p-4 py-18 sm:p-12 sm:py-8 max-w-250">
+        <section className="flex flex-col flex-1 min-w-0 gap-4 p-4 py-18 sm:p-12 sm:py-8 max-w-220">
           {children}
         </section>
       </div>
