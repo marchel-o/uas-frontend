@@ -16,14 +16,13 @@ export function Navbar(){
     { name: "Transaksi", link: "/main/transactions" },
     { name: "Riwayat", link: "/main/history" },
     { name: "Laporan", link: "/main/laporan" },
-    { name: "Pengaturan", link: "/main/settings" },
     { name: "Supplier", link: "/main/supplier" },
+    { name: "Pengaturan", link: "/main/settings" },
   ]
 
   const bottomLinks = [
     { name: "Dashboard", link: "/main/dashboard", icon: (<MonitorCloud size={20} />) },
     { name: "Produk", link: "/main/products", icon: (<Box size={20} />) },
-    { name: "Stok", link: "/main/stok", icon: (<Boxes size={20} />) },
     { name: "Transaksi", link: "/main/transactions", icon: (<NotepadText size={20} />) },
     { name: "Pengaturan", link: "/main/settings", icon: (<Settings size={20} />) },
   ]
