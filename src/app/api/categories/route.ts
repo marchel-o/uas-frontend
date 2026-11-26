@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { categorySelect, prismaErrorCode } from "@/lib/products";
+import { unauthorizedResponse } from "@/lib/api-auth";
 
 export async function GET() {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   try {
     const categories = await prisma.category.findMany({
       select: categorySelect,
@@ -24,6 +29,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   try {
     const body = await request.json().catch(() => null);
 

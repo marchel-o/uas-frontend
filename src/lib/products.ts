@@ -1,8 +1,33 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  MAX_PRICE,
+  MAX_STOCK,
+  hasMaxTwoDecimals,
+  isValidImageUrl,
+  toNumber,
+} from "@/lib/product-rules";
 
-export const MAX_PRICE = 9999999999.99;
-export const MAX_STOCK = 2147483647;
+const PRICE_ERROR =
+  "Harga jual harus lebih dari 0, maksimal 2 desimal, dan tidak melebihi 9.999.999.999,99";
+const BUY_PRICE_ERROR =
+  "Harga beli harus 0 atau lebih, maksimal 2 desimal, dan tidak melebihi 9.999.999.999,99";
+const STOCK_ERROR = "Stok harus bilangan bulat 0 sampai 2.147.483.647";
+const IMAGE_ERROR =
+  "URL gambar harus diawali /, http://, atau https:// dan maksimal 500 karakter";
+
+function isValidPrice(value: number, allowZero: boolean) {
+  return (
+    Number.isFinite(value) &&
+    (allowZero ? value >= 0 : value > 0) &&
+    value <= MAX_PRICE &&
+    hasMaxTwoDecimals(value)
+  );
+}
+
+function isValidStock(value: number) {
+  return Number.isInteger(value) && value >= 0 && value <= MAX_STOCK;
+}
 
 export type ProductInput = {
   name: string;
@@ -102,38 +127,44 @@ export function parseProductInput(
     return { error: "SKU harus 2-50 karakter" };
   }
 
-  const price = Number(body.price);
+  const price = toNumber(body.price);
 
-  if (!Number.isFinite(price) || price <= 0 || price > MAX_PRICE) {
-    return { error: "Harga jual harus lebih dari 0 dan tidak melebihi 9.999.999.999,99" };
+  if (!isValidPrice(price, false)) {
+    return { error: PRICE_ERROR };
   }
 
   const buyPrice =
-    body.buyPrice == null || body.buyPrice === "" ? null : Number(body.buyPrice);
+    body.buyPrice == null || body.buyPrice === "" ? null : toNumber(body.buyPrice);
 
-  if (
-    buyPrice !== null &&
-    (!Number.isFinite(buyPrice) || buyPrice < 0 || buyPrice > MAX_PRICE)
-  ) {
-    return { error: "Harga beli tidak valid atau melebihi 9.999.999.999,99" };
+  if (buyPrice !== null && !isValidPrice(buyPrice, true)) {
+    return { error: BUY_PRICE_ERROR };
   }
 
-  const stock = body.stock == null || body.stock === "" ? 0 : Number(body.stock);
+  const stock =
+    body.stock == null || body.stock === "" ? 0 : toNumber(body.stock);
 
-  if (!Number.isInteger(stock) || stock < 0 || stock > MAX_STOCK) {
-    return { error: "Stok harus bilangan bulat 0 sampai 2.147.483.647" };
+  if (!isValidStock(stock)) {
+    return { error: STOCK_ERROR };
   }
 
-  const categoryId = Number(body.categoryId);
+  const categoryId = toNumber(body.categoryId);
 
   if (!Number.isInteger(categoryId) || categoryId <= 0) {
     return { error: "Kategori wajib dipilih" };
+  }
+
+  if (body.image != null && typeof body.image !== "string") {
+    return { error: IMAGE_ERROR };
   }
 
   const image =
     typeof body.image === "string" && body.image.trim() !== ""
       ? body.image.trim()
       : null;
+
+  if (image !== null && !isValidImageUrl(image)) {
+    return { error: IMAGE_ERROR };
+  }
 
   return {
     data: {
@@ -158,20 +189,20 @@ export function parseProductPatch(
   const data: ProductPatch = {};
 
   if (body.price !== undefined) {
-    const price = Number(body.price);
+    const price = toNumber(body.price);
 
-    if (!Number.isFinite(price) || price <= 0 || price > MAX_PRICE) {
-      return { error: "Harga jual harus lebih dari 0 dan tidak melebihi 9.999.999.999,99" };
+    if (!isValidPrice(price, false)) {
+      return { error: PRICE_ERROR };
     }
 
     data.price = price;
   }
 
   if (body.stock !== undefined) {
-    const stock = Number(body.stock);
+    const stock = toNumber(body.stock);
 
-    if (!Number.isInteger(stock) || stock < 0 || stock > MAX_STOCK) {
-      return { error: "Stok harus bilangan bulat 0 sampai 2.147.483.647" };
+    if (!isValidStock(stock)) {
+      return { error: STOCK_ERROR };
     }
 
     data.stock = stock;
