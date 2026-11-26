@@ -7,8 +7,13 @@ import {
   productSelect,
   skuConflictMessage,
 } from "@/lib/products";
+import { unauthorizedResponse } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   try {
     const params = request.nextUrl.searchParams;
 
@@ -110,6 +115,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   const body = await request.json().catch(() => null);
   const parsed = parseProductInput(body);
 

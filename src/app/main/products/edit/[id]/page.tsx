@@ -11,10 +11,13 @@ export default function EditProduct() {
     const id = Number(params.id)
 
     const [initial, setInitial] = useState<ProductInitial | null>(null)
+    const [inactive, setInactive] = useState(false)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
 
     useEffect(() => {
+        let ignore = false
+
         async function fetchProduct() {
             try {
                 const response = await fetch(`/api/products/${params.id}`)
@@ -24,7 +27,14 @@ export default function EditProduct() {
                     throw new Error(result.message || "Gagal mengambil data produk")
                 }
 
+                if (ignore) return
+
                 const product = result.data
+
+                if (product.isActive === false) {
+                    setInactive(true)
+                    return
+                }
 
                 setInitial({
                     name: product.name,
@@ -36,13 +46,17 @@ export default function EditProduct() {
                     categoryId: String(product.categoryId),
                 })
             } catch (error) {
-                setError(error instanceof Error ? error.message : "Terjadi kesalahan")
+                if (!ignore) setError(error instanceof Error ? error.message : "Terjadi kesalahan")
             } finally {
-                setLoading(false)
+                if (!ignore) setLoading(false)
             }
         }
 
         fetchProduct()
+
+        return () => {
+            ignore = true
+        }
     }, [params.id])
 
     if (initial) {
@@ -63,6 +77,18 @@ export default function EditProduct() {
             <div className="rounded-xl p-4 bg-[var(--surface)] shadow-lg">
                 {loading ? (
                     <p className="text-[var(--text-secondary)] text-sm">Memuat produk...</p>
+                ) : inactive ? (
+                    <>
+                        <p className="text-[var(--text-secondary)] text-sm">
+                            Produk sedang nonaktif dan tidak bisa diubah. Aktifkan kembali dari halaman detail terlebih dahulu.
+                        </p>
+                        <Link
+                            href={`/main/products/detail/${id}`}
+                            className="inline-block p-2 px-3 mt-3 bg-[var(--primary)] text-white rounded-lg text-sm cursor-pointer hover:bg-[var(--primary-hover)] transition-all"
+                        >
+                            Buka Detail Produk
+                        </Link>
+                    </>
                 ) : (
                     <p className="text-red-500 text-sm">{error}</p>
                 )}

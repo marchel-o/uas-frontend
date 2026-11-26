@@ -4,6 +4,12 @@ import { ArrowLeft, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import React, { useEffect, useState } from "react"
+import {
+    MAX_PRICE,
+    MAX_STOCK,
+    hasMaxTwoDecimals,
+    isValidImageUrl,
+} from "@/lib/product-rules"
 
 export type ProductInitial = {
     name: string
@@ -90,11 +96,27 @@ export function ProductForm({ productId, initial }: ProductFormProps) {
             return "Harga jual harus lebih dari 0"
         }
 
+        if (price > MAX_PRICE) {
+            return "Harga jual tidak boleh melebihi 9.999.999.999,99"
+        }
+
+        if (!hasMaxTwoDecimals(price)) {
+            return "Harga jual maksimal 2 angka desimal"
+        }
+
         if (form.buyPrice.trim() !== "") {
             const buyPrice = Number(form.buyPrice)
 
             if (!Number.isFinite(buyPrice) || buyPrice < 0) {
                 return "Harga beli tidak valid"
+            }
+
+            if (buyPrice > MAX_PRICE) {
+                return "Harga beli tidak boleh melebihi 9.999.999.999,99"
+            }
+
+            if (!hasMaxTwoDecimals(buyPrice)) {
+                return "Harga beli maksimal 2 angka desimal"
             }
         }
 
@@ -104,6 +126,14 @@ export function ProductForm({ productId, initial }: ProductFormProps) {
             if (!Number.isInteger(stock) || stock < 0) {
                 return "Stok harus bilangan bulat 0 atau lebih"
             }
+
+            if (stock > MAX_STOCK) {
+                return "Stok tidak boleh melebihi 2.147.483.647"
+            }
+        }
+
+        if (form.image.trim() !== "" && !isValidImageUrl(form.image.trim())) {
+            return "URL gambar harus diawali /, http://, atau https:// dan maksimal 500 karakter"
         }
 
         return ""
@@ -268,7 +298,8 @@ export function ProductForm({ productId, initial }: ProductFormProps) {
                             id="product-image"
                             className={inputClass}
                             type="text"
-                            placeholder="Opsional"
+                            maxLength={500}
+                            placeholder="Opsional, contoh: https://..."
                             value={form.image}
                             onChange={(e) => setField("image", e.target.value)}
                         />

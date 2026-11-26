@@ -12,6 +12,7 @@ type Product = {
     buyPrice: number | string | null
     price: number | string
     stock: number
+    image: string | null
     isActive: boolean
     category: { id: number; name: string }
 }
@@ -29,8 +30,11 @@ export default function ProductDetail() {
     const [deleteError, setDeleteError] = useState("")
     const [restoring, setRestoring] = useState(false)
     const [restoreError, setRestoreError] = useState("")
+    const [imageFailed, setImageFailed] = useState(false)
 
     useEffect(() => {
+        let ignore = false
+
         async function fetchProduct() {
             try {
                 const response = await fetch(`/api/products/${params.id}`)
@@ -40,15 +44,22 @@ export default function ProductDetail() {
                     throw new Error(result.message || "Gagal mengambil data produk")
                 }
 
-                setProduct(result.data)
+                if (!ignore) {
+                    setProduct(result.data)
+                    setImageFailed(false)
+                }
             } catch (error) {
-                setError(error instanceof Error ? error.message : "Terjadi kesalahan")
+                if (!ignore) setError(error instanceof Error ? error.message : "Terjadi kesalahan")
             } finally {
-                setLoading(false)
+                if (!ignore) setLoading(false)
             }
         }
 
         fetchProduct()
+
+        return () => {
+            ignore = true
+        }
     }, [params.id])
 
     const formatRupiah = (num: number) => {
@@ -146,9 +157,18 @@ export default function ProductDetail() {
             ) : (
                 <div className="rounded-xl p-4 bg-[var(--surface)] shadow-lg">
                     <div className="md:flex items-center">
-                        <div className="p-5 bg-red-50 text-[var(--primary)] rounded-xl w-fit m-auto md:m-0">
-                            <Box size={36} />
-                        </div>
+                        {product.image && !imageFailed ? (
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                onError={() => setImageFailed(true)}
+                                className="w-24 h-24 object-cover rounded-xl m-auto md:m-0 shrink-0"
+                            />
+                        ) : (
+                            <div className="p-5 bg-red-50 text-[var(--primary)] rounded-xl w-fit m-auto md:m-0">
+                                <Box size={36} />
+                            </div>
+                        )}
 
                         <div className="text-center md:text-left md:ml-4 mt-3 md:mt-0">
                             <p className="font-semibold text-lg">{product.name}</p>
@@ -220,12 +240,6 @@ export default function ProductDetail() {
                     {!product.isActive && (
                         <p className="text-[var(--text-secondary)] text-sm mt-1">Stok 0, perbarui stok lewat Edit</p>
                     )}
-
-                    <p className="text-[var(--text-secondary)] text-sm mt-2">Lokasi Rak</p>
-                    <p className="font-semibold">—</p>
-
-                    <p className="text-[var(--text-secondary)] text-sm mt-2">Supplier</p>
-                    <p className="font-semibold">—</p>
                 </div>
             )}
 

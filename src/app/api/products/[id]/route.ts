@@ -8,6 +8,7 @@ import {
   productSelect,
   skuConflictMessage,
 } from "@/lib/products";
+import { unauthorizedResponse } from "@/lib/api-auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -68,6 +69,10 @@ function handleWriteError(error: unknown, fallback: string) {
 }
 
 export async function GET(_request: NextRequest, { params }: RouteContext) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   const id = parseId((await params).id);
 
   if (!id) return invalidId();
@@ -93,6 +98,10 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   const id = parseId((await params).id);
 
   if (!id) return invalidId();
@@ -138,6 +147,10 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   const id = parseId((await params).id);
 
   if (!id) return invalidId();
@@ -178,6 +191,10 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteContext) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   const id = parseId((await params).id);
 
   if (!id) return invalidId();
