@@ -4,6 +4,7 @@ import { TextAlignJustify, X, Box, NotepadText, Settings, MonitorCloud, FileText
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 
+
 export function Navbar(){
   const [navOpen, setNavOpen] = useState<boolean>(false);
   const pathName = usePathname();
@@ -15,6 +16,7 @@ export function Navbar(){
     { name: "Riwayat", link: "/main/history" },
     { name: "Laporan", link: "/main/laporan" },
     { name: "Pengaturan", link: "/main/settings" },
+    { name: "Supplier", link: "/main/supplier" },
   ]
 
   const bottomLinks = [
