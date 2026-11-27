@@ -96,14 +96,15 @@ model Payment {
 }
 
 model Supplier {
-  id          Int      @id @default(autoincrement())
-  name        String
-  contactName String?
-  phone       String
-  email       String?
-  address     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             Int             @id @default(autoincrement())
+  name           String
+  contactName    String?
+  phone          String
+  email          String?
+  address        String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  stockMovements StockMovement[]
 }
 
 enum StockMovementType {
@@ -124,6 +125,8 @@ model StockMovement {
   stockAfter  Int
   reference   String?
   supplier    String?
+  supplierId  Int?
+  supplierRef Supplier?         @relation(fields: [supplierId], references: [id])
   note        String?
   movedAt     DateTime          @default(now())
   userId      Int
