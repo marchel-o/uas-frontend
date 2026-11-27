@@ -65,13 +65,6 @@ export async function getDashboardData(){
         createdAt: "desc",
       },
       take: 5,
-      include: {
-        user: {
-          select: {
-            name: true,
-          },
-        },
-      },
     }),
 
     await prisma.transaction.aggregate({
@@ -106,15 +99,15 @@ export async function getDashboardData(){
   
   const currentSales = Number(todaySales._sum.total ?? 0);
   const beforeSales = Number(yesterdaySales._sum.total ?? 0);
-  const salesPercentage = beforeSales === 0 ? 0 : ((currentSales - beforeSales) / beforeSales) * 100;
+  const salesPercentage = ((currentSales - beforeSales) / beforeSales) * 100;
   
   const currentTransactions = todaySales._count._all ?? 0;
   const beforeTransactions = yesterdaySales._count._all ?? 0;
-  const transactionsPercentage = beforeTransactions === 0 ? 0 : ((currentTransactions - beforeTransactions) / beforeTransactions) * 100;
+  const transactionsPercentage = ((currentTransactions - beforeTransactions) / beforeTransactions) * 100;
 
   const currentQuantity = todayQuantity._sum.quantity ?? 0;
   const beforeQuantity = yesterdayQuantity._sum.quantity ?? 0;
-  const quantityPercentage = beforeQuantity === 0 ? 0 : ((currentQuantity - beforeQuantity) / beforeQuantity) * 100;
+  const quantityPercentage = ((currentQuantity - beforeQuantity) / beforeQuantity) * 100;
 
   return {
     todaySales: Number(todaySales._sum.total ?? 0),

@@ -133,3 +133,16 @@ model StockMovement {
   @@index([productId])
   @@index([movedAt])
 }
+
+enum BackupType {
+  Download
+  Restore
+}
+
+model BackupHistory {
+  id        Int         @id @default(autoincrement())
+  action    BackupType
+  fileSize  Int
+  userId    Int
+  createdAt DateTime    @default(now())
+}

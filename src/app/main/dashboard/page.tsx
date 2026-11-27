@@ -21,7 +21,7 @@ export default async function Dashboard(){
 
   const cards = [
     {
-      icon: (<Banknote size={26} className="p-1 bg-gray-200 rounded text-gray-500" />),
+      icon: (<Banknote size={26} nonScalingStroke strokeWidth={1.5} className="text-[var(--primary)] p-0.5" />),
       title: "Total Penjualan",
       amount: {
         text: todaySales,
@@ -29,12 +29,13 @@ export default async function Dashboard(){
         text2: "",
       },
       percentage: {
+        num: salesPercentage,
         text: `${salesPercentage.toFixed(0)}% than yesterday`,
         green: salesPercentage >= 0
       }
     },
     {
-      icon: (<ShoppingCart size={26} className="p-1 bg-gray-200 rounded text-gray-500" />),
+      icon: (<ShoppingCart size={26} nonScalingStroke strokeWidth={1.5} className="text-[var(--primary)] p-0.5" />),
       title: "Jumlah Transaksi",
       amount: {
         text: todayTransactions,
@@ -42,12 +43,13 @@ export default async function Dashboard(){
         text2: "transaksi",
       },
       percentage: {
+        num: transactionsPercentage,
         text: `${transactionsPercentage.toFixed(0)}% than yesterday`,
         green: transactionsPercentage >= 0
       }
     },
     {
-      icon: (<PackageCheck size={26} className="p-1 bg-gray-200 rounded text-gray-500" />),
+      icon: (<PackageCheck size={26} nonScalingStroke strokeWidth={1.5} className="text-[var(--primary)] p-0.5" />),
       title: "Produk Terjual",
       amount: {
         text: todayQuantity,
@@ -55,6 +57,7 @@ export default async function Dashboard(){
         text2: "pcs",
       },
       percentage: {
+        num: quantityPercentage,
         text: `${quantityPercentage.toFixed(0)}% than yesterday`,
         green: quantityPercentage >= 0
       }
@@ -87,20 +90,22 @@ export default async function Dashboard(){
         {cards.map((item, i) => (
           <div key={i} className="relative rounded-xl p-4 bg-[var(--surface)] shadow-lg">
             <div className="flex items-center gap-2">
-              {item.icon}
-              <p className="font-semibold text-[.9em]">{item.title}</p>
+              <div className="p-2 bg-red-50 rounded">
+                {item.icon}
+              </div>
+              <p className="font-semibold text-[.95em]">{item.title}</p>
             </div>
             
             <div className="flex justify-between mt-4">
-              <p className="flex items-center gap-1.5 font-semibold text-2xl">
+              <p className="flex items-center gap-1.5 font-semibold text-[1.2em] sm:text-2xl">
                 {item.amount.currency ? formatRupiah(item.amount.text) : item.amount.text} 
                 <span className="text-sm text-[var(--text-secondary)]">{item.amount.text2}</span>
               </p>
               
               <p 
-                className={`p-0.5 px-2 text-[.7em] ${item.percentage.green ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'} rounded text-center font-[550] self-center`}
+                className={`p-0.5 px-2 text-[.6em] sm:text-[.7em] ${item.percentage.green ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'} rounded text-center font-[550] self-center`}
               >
-                  {item.percentage.text}
+                  {Number.isFinite(item.percentage.num) ? `${item.percentage.green ? "+" : "-"}${item.percentage.text}` : "Belum Ada Pembanding"}
               </p>
             </div>
           </div>
@@ -110,7 +115,7 @@ export default async function Dashboard(){
       <div className="rounded-xl p-4 bg-[var(--surface)] shadow-lg">
         <div className="flex justify-between items-center">
           <p className="font-semibold">Transaksi Terbaru</p>
-          <a href='/' className="text-blue-600 text-sm cursor-pointer">Lihat semua</a>
+          <a href='/main/history' className="text-blue-600 text-sm cursor-pointer">Lihat semua</a>
         </div>
         
         <div className="flex flex-col gap-2 mt-4">
