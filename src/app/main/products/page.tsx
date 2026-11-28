@@ -12,6 +12,7 @@ type Product = {
     sku: string
     price: number | string
     stock: number
+    isActive: boolean
     category: { id: number; name: string }
 }
 
@@ -135,7 +136,11 @@ export default function Products() {
                 return
             }
 
-            setProducts((prev) => prev.filter((item) => item.id !== product.id))
+            setProducts((prev) =>
+                status === "all"
+                    ? prev.map((item) => (item.id === product.id ? result.data : item))
+                    : prev.filter((item) => item.id !== product.id)
+            )
         } catch {
             setActionError("Gagal terhubung ke server")
         } finally {
@@ -166,7 +171,15 @@ export default function Products() {
                 return
             }
 
-            setProducts((prev) => prev.filter((item) => item.id !== deleteTarget.id))
+            setProducts((prev) =>
+                status === "all"
+                    ? prev.map((item) =>
+                          item.id === deleteTarget.id
+                              ? { ...item, isActive: false, stock: 0 }
+                              : item
+                      )
+                    : prev.filter((item) => item.id !== deleteTarget.id)
+            )
             closeDelete()
         } catch {
             setDeleteError("Gagal terhubung ke server")
@@ -221,6 +234,7 @@ export default function Products() {
                         >
                             <option value="active">Aktif</option>
                             <option value="inactive">Nonaktif</option>
+                            <option value="all">Semua Status</option>
                         </select>
 
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
@@ -285,7 +299,14 @@ export default function Products() {
                                         </div>
 
                                         <div className="min-w-0 flex-1">
-                                            <p className="font-semibold truncate">{product.name}</p>
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <p className="font-semibold truncate">{product.name}</p>
+                                                {!product.isActive && (
+                                                    <span className="p-0.5 px-2 text-[.7em] rounded font-[550] shrink-0 bg-red-200 text-red-800">
+                                                        Nonaktif
+                                                    </span>
+                                                )}
+                                            </div>
                                             <p className="text-[var(--text-secondary)] text-sm truncate">
                                                 {product.sku} • {product.category.name}
                                             </p>
@@ -308,7 +329,7 @@ export default function Products() {
                                             >
                                                 <Eye size={16} />
                                             </Link>
-                                            {status === "active" ? (
+                                            {product.isActive ? (
                                                 <>
                                                     <Link
                                                         href={`/main/products/edit/${product.id}`}
