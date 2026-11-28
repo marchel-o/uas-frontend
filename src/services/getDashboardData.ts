@@ -65,13 +65,6 @@ export async function getDashboardData(){
         createdAt: "desc",
       },
       take: 5,
-      include: {
-        user: {
-          select: {
-            name: true,
-          },
-        },
-      },
     }),
 
     await prisma.transaction.aggregate({

@@ -3,6 +3,7 @@
 import { Box, ChevronDown, Eye, Pencil, Plus, RotateCcw, Search, Tags, Trash2 } from "lucide-react"
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
+import { LOW_STOCK_THRESHOLD } from "@/lib/stock"
 
 type Product = {
     id: number
@@ -26,6 +27,7 @@ export default function Products() {
     const [categoryId, setCategoryId] = useState("")
     const [status, setStatus] = useState("active")
     const [loading, setLoading] = useState(true)
+    const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState("")
     const [actionError, setActionError] = useState("")
     const [restoringId, setRestoringId] = useState<number | null>(null)
@@ -62,7 +64,7 @@ export default function Products() {
 
         async function fetchProducts() {
             try {
-                setLoading(true)
+                setRefreshing(true)
                 setError("")
                 setActionError("")
 
@@ -84,7 +86,10 @@ export default function Products() {
             } catch (error) {
                 if (!ignore) setError(error instanceof Error ? error.message : "Terjadi kesalahan")
             } finally {
-                if (!ignore) setLoading(false)
+                if (!ignore) {
+                    setLoading(false)
+                    setRefreshing(false)
+                }
             }
         }
 
@@ -105,7 +110,7 @@ export default function Products() {
 
     const stockClass = (stock: number) => {
         if (stock === 0) return "bg-red-50 text-red-600"
-        if (stock <= 5) return "bg-orange-50 text-orange-600"
+        if (stock <= LOW_STOCK_THRESHOLD) return "bg-orange-50 text-orange-600"
         return "bg-gray-100 text-[var(--text-secondary)]"
     }
 
@@ -248,7 +253,9 @@ export default function Products() {
                     </div>
                     <div>
                         <p className="font-semibold text-[1.1rem]">Daftar Produk</p>
-                        <p className="text-[var(--text-secondary)] text-[.8rem]">{products.length} produk</p>
+                        <p className="text-[var(--text-secondary)] text-[.8rem]">
+                            {products.length} produk{refreshing && !loading ? " • memperbarui..." : ""}
+                        </p>
                     </div>
                 </div>
 
@@ -270,62 +277,66 @@ export default function Products() {
                     <div className="mt-3 flex flex-col gap-2">
                         {products.map((product, i) => (
                             <React.Fragment key={product.id}>
-                                <div className="flex items-center gap-3 mx-2">
-                                    <div className="p-2.5 bg-red-50 text-[var(--primary)] rounded-xl shrink-0">
-                                        <Box size={20} />
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mx-2">
+                                    <div className="flex items-center gap-3 min-w-0 sm:flex-1">
+                                        <div className="p-2.5 bg-red-50 text-[var(--primary)] rounded-xl shrink-0">
+                                            <Box size={20} />
+                                        </div>
+
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-semibold truncate">{product.name}</p>
+                                            <p className="text-[var(--text-secondary)] text-sm truncate">
+                                                {product.sku} • {product.category.name}
+                                            </p>
+                                            <p className="text-[var(--primary)] text-sm font-semibold mt-0.5">
+                                                {formatRupiah(Number(product.price))}
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <div className="min-w-0 flex-1">
-                                        <p className="font-semibold truncate">{product.name}</p>
-                                        <p className="text-[var(--text-secondary)] text-sm truncate">
-                                            {product.sku} • {product.category.name}
+                                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                                        <p className={`p-0.5 px-2 text-[.7em] rounded text-center font-[550] shrink-0 ${stockClass(product.stock)}`}>
+                                            {product.stock} pcs
                                         </p>
-                                        <p className="text-[var(--primary)] text-sm font-semibold mt-0.5">
-                                            {formatRupiah(Number(product.price))}
-                                        </p>
-                                    </div>
 
-                                    <p className={`p-0.5 px-2 text-[.7em] rounded text-center font-[550] shrink-0 ${stockClass(product.stock)}`}>
-                                        {product.stock} pcs
-                                    </p>
-
-                                    <div className="flex gap-1.5 shrink-0">
-                                        <Link
-                                            href={`/main/products/detail/${product.id}`}
-                                            aria-label={`Detail ${product.name}`}
-                                            className="p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-all"
-                                        >
-                                            <Eye size={16} />
-                                        </Link>
-                                        {status === "active" ? (
-                                            <>
-                                                <Link
-                                                    href={`/main/products/edit/${product.id}`}
-                                                    aria-label={`Ubah ${product.name}`}
-                                                    className="p-2 bg-red-50 text-[var(--primary)] rounded-lg cursor-pointer hover:bg-red-100 transition-all"
-                                                >
-                                                    <Pencil size={16} />
-                                                </Link>
+                                        <div className="flex gap-1.5 shrink-0">
+                                            <Link
+                                                href={`/main/products/detail/${product.id}`}
+                                                aria-label={`Detail ${product.name}`}
+                                                className="p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-all"
+                                            >
+                                                <Eye size={16} />
+                                            </Link>
+                                            {status === "active" ? (
+                                                <>
+                                                    <Link
+                                                        href={`/main/products/edit/${product.id}`}
+                                                        aria-label={`Ubah ${product.name}`}
+                                                        className="p-2 bg-red-50 text-[var(--primary)] rounded-lg cursor-pointer hover:bg-red-100 transition-all"
+                                                    >
+                                                        <Pencil size={16} />
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setDeleteTarget(product)}
+                                                        aria-label={`Hapus ${product.name}`}
+                                                        className="p-2 bg-red-50 text-red-600 rounded-lg cursor-pointer hover:bg-red-100 transition-all"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </>
+                                            ) : (
                                                 <button
                                                     type="button"
-                                                    onClick={() => setDeleteTarget(product)}
-                                                    aria-label={`Hapus ${product.name}`}
-                                                    className="p-2 bg-red-50 text-red-600 rounded-lg cursor-pointer hover:bg-red-100 transition-all"
+                                                    disabled={restoringId === product.id}
+                                                    onClick={() => handleRestore(product)}
+                                                    className="flex items-center gap-1.5 p-2 px-3 bg-[var(--primary)] text-white rounded-lg text-sm cursor-pointer hover:bg-[var(--primary-hover)] disabled:opacity-50 transition-all"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <RotateCcw size={16} />
+                                                    <span>{restoringId === product.id ? "Memulihkan..." : "Pulihkan"}</span>
                                                 </button>
-                                            </>
-                                        ) : (
-                                            <button
-                                                type="button"
-                                                disabled={restoringId === product.id}
-                                                onClick={() => handleRestore(product)}
-                                                className="flex items-center gap-1.5 p-2 px-3 bg-[var(--primary)] text-white rounded-lg text-sm cursor-pointer hover:bg-[var(--primary-hover)] disabled:opacity-50 transition-all"
-                                            >
-                                                <RotateCcw size={16} />
-                                                <span>{restoringId === product.id ? "Memulihkan..." : "Pulihkan"}</span>
-                                            </button>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 

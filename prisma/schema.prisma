@@ -146,3 +146,16 @@ model StoreSetting {
   receiptNote String?
   updatedAt   DateTime @updatedAt
 }
+
+enum BackupType {
+  Download
+  Restore
+}
+
+model BackupHistory {
+  id        Int        @id @default(autoincrement())
+  action    BackupType
+  fileSize  Int
+  userId    Int
+  createdAt DateTime   @default(now())
+}

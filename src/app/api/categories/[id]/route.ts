@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { categorySelect, parseId, prismaErrorCode } from "@/lib/products";
+import { unauthorizedResponse } from "@/lib/api-auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -10,6 +11,10 @@ const CATEGORY_IN_USE =
   "Kategori tidak bisa dihapus karena masih terhubung dengan data/riwayat produk";
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   const { id: rawId } = await params;
   const id = parseId(rawId);
 
@@ -69,6 +74,10 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteContext) {
+  const denied = await unauthorizedResponse();
+
+  if (denied) return denied;
+
   const { id: rawId } = await params;
   const id = parseId(rawId);
 

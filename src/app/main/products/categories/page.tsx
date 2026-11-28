@@ -29,6 +29,8 @@ export default function Categories() {
     const [deleteError, setDeleteError] = useState("")
 
     useEffect(() => {
+        let ignore = false
+
         async function fetchCategories() {
             try {
                 const response = await fetch("/api/categories")
@@ -38,15 +40,19 @@ export default function Categories() {
                     throw new Error(result.message || "Gagal mengambil kategori")
                 }
 
-                setCategories(result.data)
+                if (!ignore) setCategories(result.data)
             } catch (error) {
-                setError(error instanceof Error ? error.message : "Terjadi kesalahan")
+                if (!ignore) setError(error instanceof Error ? error.message : "Terjadi kesalahan")
             } finally {
-                setLoading(false)
+                if (!ignore) setLoading(false)
             }
         }
 
         fetchCategories()
+
+        return () => {
+            ignore = true
+        }
     }, [])
 
     const sortByName = (list: Category[]) =>
@@ -56,13 +62,22 @@ export default function Categories() {
         e.preventDefault()
         setAddError("")
 
+        if (adding) return
+
+        const trimmed = name.trim()
+
+        if (trimmed.length < 1 || trimmed.length > 50) {
+            setAddError("Nama kategori harus 1-50 karakter")
+            return
+        }
+
         try {
             setAdding(true)
 
             const response = await fetch("/api/categories", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name }),
+                body: JSON.stringify({ name: trimmed }),
             })
             const result = await response.json()
 
@@ -95,13 +110,22 @@ export default function Categories() {
     const handleSave = async (id: number) => {
         setEditError("")
 
+        if (saving) return
+
+        const trimmed = editName.trim()
+
+        if (trimmed.length < 1 || trimmed.length > 50) {
+            setEditError("Nama kategori harus 1-50 karakter")
+            return
+        }
+
         try {
             setSaving(true)
 
             const response = await fetch(`/api/categories/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: editName }),
+                body: JSON.stringify({ name: trimmed }),
             })
             const result = await response.json()
 
@@ -221,7 +245,7 @@ export default function Categories() {
                                                 value={editName}
                                                 onChange={(e) => setEditName(e.target.value)}
                                                 onKeyDown={(e) => {
-                                                    if (e.key === "Enter") handleSave(category.id)
+                                                    if (e.key === "Enter" && !saving) handleSave(category.id)
                                                     if (e.key === "Escape") cancelEdit()
                                                 }}
                                             />
