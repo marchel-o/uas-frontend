@@ -4,6 +4,7 @@ import { Box, ChevronDown, Eye, Pencil, Plus, RotateCcw, Search, Tags, Trash2 } 
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import { LOW_STOCK_THRESHOLD } from "@/lib/stock"
+import { ConfirmDeleteModal } from "./_components/ConfirmDeleteModal"
 
 type Product = {
     id: number
@@ -11,6 +12,7 @@ type Product = {
     sku: string
     price: number | string
     stock: number
+    isActive: boolean
     category: { id: number; name: string }
 }
 
@@ -134,7 +136,11 @@ export default function Products() {
                 return
             }
 
-            setProducts((prev) => prev.filter((item) => item.id !== product.id))
+            setProducts((prev) =>
+                status === "all"
+                    ? prev.map((item) => (item.id === product.id ? result.data : item))
+                    : prev.filter((item) => item.id !== product.id)
+            )
         } catch {
             setActionError("Gagal terhubung ke server")
         } finally {
@@ -165,7 +171,15 @@ export default function Products() {
                 return
             }
 
-            setProducts((prev) => prev.filter((item) => item.id !== deleteTarget.id))
+            setProducts((prev) =>
+                status === "all"
+                    ? prev.map((item) =>
+                          item.id === deleteTarget.id
+                              ? { ...item, isActive: false, stock: 0 }
+                              : item
+                      )
+                    : prev.filter((item) => item.id !== deleteTarget.id)
+            )
             closeDelete()
         } catch {
             setDeleteError("Gagal terhubung ke server")
@@ -220,6 +234,7 @@ export default function Products() {
                         >
                             <option value="active">Aktif</option>
                             <option value="inactive">Nonaktif</option>
+                            <option value="all">Semua Status</option>
                         </select>
 
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
@@ -284,7 +299,14 @@ export default function Products() {
                                         </div>
 
                                         <div className="min-w-0 flex-1">
-                                            <p className="font-semibold truncate">{product.name}</p>
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <p className="font-semibold truncate">{product.name}</p>
+                                                {!product.isActive && (
+                                                    <span className="p-0.5 px-2 text-[.7em] rounded font-[550] shrink-0 bg-red-200 text-red-800">
+                                                        Nonaktif
+                                                    </span>
+                                                )}
+                                            </div>
                                             <p className="text-[var(--text-secondary)] text-sm truncate">
                                                 {product.sku} • {product.category.name}
                                             </p>
@@ -307,7 +329,7 @@ export default function Products() {
                                             >
                                                 <Eye size={16} />
                                             </Link>
-                                            {status === "active" ? (
+                                            {product.isActive ? (
                                                 <>
                                                     <Link
                                                         href={`/main/products/edit/${product.id}`}
@@ -348,39 +370,18 @@ export default function Products() {
             </div>
 
             {deleteTarget && (
-                <>
-                    <div
-                        className="w-full h-full fixed inset-0 z-9 bg-black transition-all opacity-50 duration-200"
-                        onClick={closeDelete}
-                    ></div>
-
-                    <div className="fixed bg-white p-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 min-w-62.5 max-w-sm rounded-lg">
-                        <h3 className="text-red-500 text-xl text-center font-semibold">Hapus Produk</h3>
-
-                        <p className="text-center mt-3 text-[var(--text-secondary)]">
-                            Yakin ingin menghapus produk <span className="font-semibold">{deleteTarget.name}</span>?
-                        </p>
-
-                        {deleteError && <p className="text-red-500 text-sm text-center mt-2">{deleteError}</p>}
-
-                        <div className="text-blue-500 font-medium flex gap-4 mt-4">
-                            <button
-                                className="text-center p-2 w-full rounded-lg cursor-pointer"
-                                onClick={closeDelete}
-                            >
-                                Tidak
-                            </button>
-
-                            <button
-                                className="text-center p-2 w-full rounded-lg cursor-pointer disabled:opacity-50"
-                                disabled={deleting}
-                                onClick={handleDelete}
-                            >
-                                {deleting ? "Menghapus..." : "Ya"}
-                            </button>
-                        </div>
-                    </div>
-                </>
+                <ConfirmDeleteModal
+                    title="Hapus Produk"
+                    description={
+                        <>
+                            Yakin ingin menghapus produk <span className="font-semibold text-[var(--text-primary)]">{deleteTarget.name}</span>?
+                        </>
+                    }
+                    error={deleteError}
+                    deleting={deleting}
+                    onCancel={closeDelete}
+                    onConfirm={handleDelete}
+                />
             )}
         </>
     )

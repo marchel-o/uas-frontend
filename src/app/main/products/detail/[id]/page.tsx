@@ -4,6 +4,7 @@ import { ArrowLeft, Box, Edit, RotateCcw, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import React, { useEffect, useState } from "react"
+import { ConfirmDeleteModal } from "../../_components/ConfirmDeleteModal"
 
 type Product = {
     id: number
@@ -244,39 +245,18 @@ export default function ProductDetail() {
             )}
 
             {deletePopup && product && (
-                <>
-                    <div
-                        className="w-full h-full fixed inset-0 z-9 bg-black transition-all opacity-50 duration-200"
-                        onClick={closeDelete}
-                    ></div>
-
-                    <div className="fixed bg-white p-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 min-w-62.5 max-w-sm rounded-lg">
-                        <h3 className="text-red-500 text-xl text-center font-semibold">Hapus Produk</h3>
-
-                        <p className="text-center mt-3 text-[var(--text-secondary)]">
-                            Yakin ingin menghapus produk <span className="font-semibold">{product.name}</span>?
-                        </p>
-
-                        {deleteError && <p className="text-red-500 text-sm text-center mt-2">{deleteError}</p>}
-
-                        <div className="text-blue-500 font-medium flex gap-4 mt-4">
-                            <button
-                                className="text-center p-2 w-full rounded-lg cursor-pointer"
-                                onClick={closeDelete}
-                            >
-                                Tidak
-                            </button>
-
-                            <button
-                                className="text-center p-2 w-full rounded-lg cursor-pointer disabled:opacity-50"
-                                disabled={deleting}
-                                onClick={handleDelete}
-                            >
-                                {deleting ? "Menghapus..." : "Ya"}
-                            </button>
-                        </div>
-                    </div>
-                </>
+                <ConfirmDeleteModal
+                    title="Hapus Produk"
+                    description={
+                        <>
+                            Yakin ingin menghapus produk <span className="font-semibold text-[var(--text-primary)]">{product.name}</span>?
+                        </>
+                    }
+                    error={deleteError}
+                    deleting={deleting}
+                    onCancel={closeDelete}
+                    onConfirm={handleDelete}
+                />
             )}
         </>
     )
