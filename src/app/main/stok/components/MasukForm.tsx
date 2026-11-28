@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { PackagePlus } from "lucide-react";
 import { todayJakarta } from "@/lib/stock";
@@ -10,17 +10,42 @@ import { ItemRows, newRow, rowsToItems, type ItemRow } from "./ItemRows";
 import { Notice, type NoticeState } from "./Notice";
 import { cardClass, inputClass, labelClass, primaryButton } from "./ui";
 
+type SupplierOption = {
+  id: number;
+  name: string;
+  contactName?: string | null;
+  phone?: string | null;
+};
+
 export default function MasukForm() {
   const params = useSearchParams();
   const { products, loading, error, reload } = useProducts();
 
   const [reference, setReference] = useState("");
   const [supplier, setSupplier] = useState("");
+  const [suppliers, setSuppliers] = useState<SupplierOption[]>([]);
   const [date, setDate] = useState(todayJakarta);
   const [note, setNote] = useState("");
   const [rows, setRows] = useState<ItemRow[]>(() => [newRow(params.get("sku") ?? "")]);
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<NoticeState>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/suppliers")
+      .then((res) => res.json())
+      .then((result) => {
+        if (active && result.success && Array.isArray(result.data)) {
+          setSuppliers(result.data);
+        }
+      })
+      .catch(() => {
+        // Biarkan kosong jika gagal memuat supplier agar tetap bisa ketik manual
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -92,11 +117,20 @@ export default function MasukForm() {
             </label>
             <input
               id="supplier"
+              list="supplier-options"
               className={inputClass}
               value={supplier}
               onChange={(e) => setSupplier(e.target.value)}
-              placeholder="Nama supplier"
+              placeholder="Pilih atau ketik nama supplier"
+              autoComplete="off"
             />
+            <datalist id="supplier-options">
+              {suppliers.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {[item.contactName, item.phone].filter(Boolean).join(" • ")}
+                </option>
+              ))}
+            </datalist>
           </div>
           <div>
             <label className={labelClass} htmlFor="date">
