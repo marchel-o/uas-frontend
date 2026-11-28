@@ -136,3 +136,13 @@ model StockMovement {
   @@index([productId])
   @@index([movedAt])
 }
+
+model StoreSetting {
+  id          Int      @id @default(1)
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  receiptNote String?
+  updatedAt   DateTime @updatedAt
+}

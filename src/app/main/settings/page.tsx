@@ -4,7 +4,7 @@ import React from "react";
 export default function Settings(){
   const links = [
     { name: "Profile Pengguna", link: "/main/profile", icon: (<User size={18} />) },
-    { name: "Informasi Toko", link: "/", icon: (<Store size={18} />) },
+    { name: "Informasi Toko", link: "/main/settings/toko", icon: (<Store size={18} />) },
     { name: "Backup Data", link: "/main/backup", icon: (<Database size={18} />) },
   ]
 
